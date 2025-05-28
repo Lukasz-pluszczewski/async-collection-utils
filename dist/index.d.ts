@@ -1,6 +1,9 @@
 type ObjectKey = string | number | symbol;
 type StringifiedObjectKey<TKey extends ObjectKey> = TKey extends string ? TKey : string;
-type ObjectEntry<TKey extends ObjectKey, TValue> = [StringifiedObjectKey<TKey>, TValue];
+type ObjectEntry<TKey extends ObjectKey, TValue> = [
+    StringifiedObjectKey<TKey>,
+    TValue
+];
 declare const Break: unique symbol;
 type BreakSymbol = typeof Break;
 declare class LastClass<T> {

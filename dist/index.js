@@ -120,7 +120,12 @@ async function asyncForEach(array, callback) {
 async function asyncReduce(array, callback, initialValue) {
   let accumulator = initialValue;
   for (let i = 0; i < array.length; i++) {
-    const iterationResult = await callback(accumulator, array[i], i, array);
+    const iterationResult = await callback(
+      accumulator,
+      array[i],
+      i,
+      array
+    );
     if (iterationResult instanceof LastClass) {
       accumulator = iterationResult.value;
       break;
@@ -191,7 +196,12 @@ async function asyncReduceValues(object, callback, initialValue) {
   let accumulator = initialValue;
   for (const key in object) {
     if (object.hasOwnProperty(key)) {
-      const iterationResult = await callback(accumulator, object[key], key, object);
+      const iterationResult = await callback(
+        accumulator,
+        object[key],
+        key,
+        object
+      );
       if (iterationResult instanceof LastClass) {
         accumulator = iterationResult.value;
         break;
@@ -244,9 +254,11 @@ async function asyncFilterParallel(array, callback) {
 }
 async function asyncMapValuesParallel(object, callback) {
   const result = {};
-  await Promise.all(keys(object).map(async (key) => {
-    result[key] = await callback(object[key], key, object);
-  }));
+  await Promise.all(
+    keys(object).map(async (key) => {
+      result[key] = await callback(object[key], key, object);
+    })
+  );
   return result;
 }
 async function asyncMapEntriesParallel(object, callback) {
@@ -256,9 +268,11 @@ async function asyncMapKeysParallel(object, callback) {
   return asyncMapParallel(keys(object), callback);
 }
 async function asyncForEachValuesParallel(object, callback) {
-  await Promise.all(keys(object).map(async (key) => {
-    await callback(object[key], key, object);
-  }));
+  await Promise.all(
+    keys(object).map(async (key) => {
+      await callback(object[key], key, object);
+    })
+  );
 }
 async function asyncForEachEntriesParallel(object, callback) {
   await asyncForEachParallel(entries(object), callback);
@@ -268,29 +282,35 @@ async function asyncForEachKeysParallel(object, callback) {
 }
 async function asyncFilterValuesParallel(object, callback) {
   const result = {};
-  await Promise.all(keys(object).map(async (key) => {
-    if (await callback(object[key], key, object)) {
-      result[key] = object[key];
-    }
-  }));
+  await Promise.all(
+    keys(object).map(async (key) => {
+      if (await callback(object[key], key, object)) {
+        result[key] = object[key];
+      }
+    })
+  );
   return result;
 }
 async function asyncFilterKeysParallel(object, callback) {
   const objectKeys = keys(object);
-  const result = await Promise.all(objectKeys.map(async (key, index) => {
-    if (await callback(key, index, objectKeys)) {
-      return key;
-    }
-  }));
+  const result = await Promise.all(
+    objectKeys.map(async (key, index) => {
+      if (await callback(key, index, objectKeys)) {
+        return key;
+      }
+    })
+  );
   return result.filter(Boolean);
 }
 async function asyncFilterEntriesParallel(object, callback) {
   const objectEntries = entries(object);
-  const result = await Promise.all(objectEntries.map(async (entry, index) => {
-    if (await callback(entry, index, objectEntries)) {
-      return entry;
-    }
-  }));
+  const result = await Promise.all(
+    objectEntries.map(async (entry, index) => {
+      if (await callback(entry, index, objectEntries)) {
+        return entry;
+      }
+    })
+  );
   return result.filter(Boolean);
 }
 function map(array, callback) {
@@ -390,7 +410,12 @@ function reduceValues(object, callback, initialValue) {
   let accumulator = initialValue;
   for (const key in object) {
     if (object.hasOwnProperty(key)) {
-      const iterationResult = callback(accumulator, object[key], key, object);
+      const iterationResult = callback(
+        accumulator,
+        object[key],
+        key,
+        object
+      );
       if (iterationResult instanceof LastClass) {
         accumulator = iterationResult.value;
         break;
