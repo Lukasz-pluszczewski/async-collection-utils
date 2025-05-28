@@ -12,6 +12,9 @@ A collection of map, forEach, reduce, mapValues, filter etc. utility functions f
     * [Sequential](#sequential-1)
     * [Parallel](#parallel-1)
   * [Using Break and Last](#using-break-and-last)
+  * [Synchronous](#synchronous)
+  * [Helpers](#helpers)
+* [Changelog](#changelog)
 
 ## Core Concepts
 
