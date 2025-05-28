@@ -21,7 +21,7 @@ A collection of map, forEach, reduce, mapValues, filter etc. utility functions f
 ## Usage
 ### Import
 ```javascript
-import { asyncMap, asyncForEach, asyncMapParallel, Break, Last } from './asyncCollections';
+import { asyncMap, asyncForEach, asyncMapParallel, Break, Last } from 'async-collection-utils';
 ```
 
 ### Array Utilities
@@ -146,3 +146,62 @@ const reduced = await asyncReduce(data, async (acc, item) => {
 }, 0);
 // result: 6
 ```
+
+### Synchronous
+For convenience, library also exports synchronous versions of the utilities, with the same interfaces.
+
+Available synchronous utilities:
+- `map`
+- `forEach`
+- `reduce`
+- `filter`
+- `mapValues`
+- `mapKeys`
+- `mapEntries`
+- `forEachValues`
+- `forEachKeys`
+- `forEachEntries`
+- `reduceValues`
+- `reduceKeys`
+- `reduceEntries`
+- `filterValues`
+- `filterKeys`
+- `filterEntries`
+
+### Helpers
+Two helpers used internally are exported as well:
+
+- `entries`: The same as `Object.entries` but with better typings
+    ```javascript
+    import { entries } from 'async-collection-utils';
+  
+    enum SomeEnum {
+      foo = 'foo',
+      bar = 'bar',
+    }
+    const obj = { [SomeEnum.foo]: 1, [SomeEnum.bar]: 2 };
+    const result: [SomeEnum, number][] = await entries(obj);
+    // result: [[SomeEnum.foo, 1], [SomeEnum.bar, 2]]
+    ```
+
+- `keys`: The same as `Object.keys` but with better typings
+    ```javascript
+    import { keys } from 'async-collection-utils';
+  
+    enum SomeEnum {
+      foo = 'foo',
+      bar = 'bar',
+    }
+    const obj = { [SomeEnum.foo]: 1, [SomeEnum.bar]: 2 };
+    const result: SomeEnum[] = await keys(obj);
+    // result: [SomeEnum.foo, SomeEnum.bar]
+    ```
+
+## Changelog
+
+### 1.0.0
+- Initial release
+
+### 1.1.0
+- Added synchronous utilities
+- Added `entries` and `keys` helpers

@@ -48,7 +48,25 @@ __export(index_exports, {
   asyncReduce: () => asyncReduce,
   asyncReduceEntries: () => asyncReduceEntries,
   asyncReduceKeys: () => asyncReduceKeys,
-  asyncReduceValues: () => asyncReduceValues
+  asyncReduceValues: () => asyncReduceValues,
+  entries: () => entries,
+  filter: () => filter,
+  filterEntries: () => filterEntries,
+  filterKeys: () => filterKeys,
+  filterValues: () => filterValues,
+  forEach: () => forEach,
+  forEachEntries: () => forEachEntries,
+  forEachKeys: () => forEachKeys,
+  forEachValues: () => forEachValues,
+  keys: () => keys,
+  map: () => map,
+  mapEntries: () => mapEntries,
+  mapKeys: () => mapKeys,
+  mapValues: () => mapValues,
+  reduce: () => reduce,
+  reduceEntries: () => reduceEntries,
+  reduceKeys: () => reduceKeys,
+  reduceValues: () => reduceValues
 });
 module.exports = __toCommonJS(index_exports);
 var Break = Symbol("BreakSymbol");
@@ -58,6 +76,24 @@ var LastClass = class {
   }
 };
 var Last = (value) => new LastClass(value);
+var entries = (object) => {
+  const result = [];
+  for (const key in object) {
+    if (object.hasOwnProperty(key)) {
+      result.push([key, object[key]]);
+    }
+  }
+  return result;
+};
+var keys = (object) => {
+  const result = [];
+  for (const key in object) {
+    if (object.hasOwnProperty(key)) {
+      result.push(key);
+    }
+  }
+  return result;
+};
 async function asyncMap(array, callback) {
   const result = [];
   for (let i = 0; i < array.length; i++) {
@@ -130,10 +166,10 @@ async function asyncMapValues(object, callback) {
   return result;
 }
 async function asyncMapEntries(object, callback) {
-  return asyncMap(Object.entries(object), callback);
+  return asyncMap(entries(object), callback);
 }
 async function asyncMapKeys(object, callback) {
-  return asyncMap(Object.keys(object), callback);
+  return asyncMap(keys(object), callback);
 }
 async function asyncForEachValues(object, callback) {
   for (const key in object) {
@@ -146,10 +182,10 @@ async function asyncForEachValues(object, callback) {
   }
 }
 async function asyncForEachEntries(object, callback) {
-  await asyncForEach(Object.entries(object), callback);
+  await asyncForEach(entries(object), callback);
 }
 async function asyncForEachKeys(object, callback) {
-  await asyncForEach(Object.keys(object), callback);
+  await asyncForEach(keys(object), callback);
 }
 async function asyncReduceValues(object, callback, initialValue) {
   let accumulator = initialValue;
@@ -166,10 +202,10 @@ async function asyncReduceValues(object, callback, initialValue) {
   return accumulator;
 }
 async function asyncReduceEntries(object, callback, initialValue) {
-  return asyncReduce(Object.entries(object), callback, initialValue);
+  return asyncReduce(entries(object), callback, initialValue);
 }
 async function asyncReduceKeys(object, callback, initialValue) {
-  return asyncReduce(Object.keys(object), callback, initialValue);
+  return asyncReduce(keys(object), callback, initialValue);
 }
 async function asyncFilterValues(object, callback) {
   const result = {};
@@ -191,10 +227,10 @@ async function asyncFilterValues(object, callback) {
   return result;
 }
 async function asyncFilterKeys(object, callback) {
-  return asyncFilter(Object.keys(object), callback);
+  return asyncFilter(keys(object), callback);
 }
 async function asyncFilterEntries(object, callback) {
-  return asyncFilter(Object.entries(object), callback);
+  return asyncFilter(entries(object), callback);
 }
 async function asyncMapParallel(array, callback) {
   return Promise.all(array.map(callback));
@@ -208,31 +244,31 @@ async function asyncFilterParallel(array, callback) {
 }
 async function asyncMapValuesParallel(object, callback) {
   const result = {};
-  await Promise.all(Object.keys(object).map(async (key) => {
+  await Promise.all(keys(object).map(async (key) => {
     result[key] = await callback(object[key], key, object);
   }));
   return result;
 }
 async function asyncMapEntriesParallel(object, callback) {
-  return asyncMapParallel(Object.entries(object), callback);
+  return asyncMapParallel(entries(object), callback);
 }
 async function asyncMapKeysParallel(object, callback) {
-  return asyncMapParallel(Object.keys(object), callback);
+  return asyncMapParallel(keys(object), callback);
 }
 async function asyncForEachValuesParallel(object, callback) {
-  await Promise.all(Object.keys(object).map(async (key) => {
+  await Promise.all(keys(object).map(async (key) => {
     await callback(object[key], key, object);
   }));
 }
 async function asyncForEachEntriesParallel(object, callback) {
-  await asyncForEachParallel(Object.entries(object), callback);
+  await asyncForEachParallel(entries(object), callback);
 }
 async function asyncForEachKeysParallel(object, callback) {
-  await asyncForEachParallel(Object.keys(object), callback);
+  await asyncForEachParallel(keys(object), callback);
 }
 async function asyncFilterValuesParallel(object, callback) {
   const result = {};
-  await Promise.all(Object.keys(object).map(async (key) => {
+  await Promise.all(keys(object).map(async (key) => {
     if (await callback(object[key], key, object)) {
       result[key] = object[key];
     }
@@ -240,22 +276,162 @@ async function asyncFilterValuesParallel(object, callback) {
   return result;
 }
 async function asyncFilterKeysParallel(object, callback) {
-  const keys = Object.keys(object);
-  const result = await Promise.all(keys.map(async (key, index) => {
-    if (await callback(key, index, keys)) {
+  const objectKeys = keys(object);
+  const result = await Promise.all(objectKeys.map(async (key, index) => {
+    if (await callback(key, index, objectKeys)) {
       return key;
     }
   }));
   return result.filter(Boolean);
 }
 async function asyncFilterEntriesParallel(object, callback) {
-  const entries = Object.entries(object);
-  const result = await Promise.all(entries.map(async (entry, index) => {
-    if (await callback(entry, index, entries)) {
+  const objectEntries = entries(object);
+  const result = await Promise.all(objectEntries.map(async (entry, index) => {
+    if (await callback(entry, index, objectEntries)) {
       return entry;
     }
   }));
   return result.filter(Boolean);
+}
+function map(array, callback) {
+  const result = [];
+  for (let i = 0; i < array.length; i++) {
+    const iterationResult = callback(array[i], i, array);
+    if (iterationResult === Break) {
+      break;
+    }
+    if (iterationResult instanceof LastClass) {
+      result.push(iterationResult.value);
+      break;
+    }
+    result.push(iterationResult);
+  }
+  return result;
+}
+function forEach(array, callback) {
+  for (let i = 0; i < array.length; i++) {
+    const iterationResult = callback(array[i], i, array);
+    if (iterationResult === Break) {
+      break;
+    }
+  }
+}
+function reduce(array, callback, initialValue) {
+  let accumulator = initialValue;
+  for (let i = 0; i < array.length; i++) {
+    const iterationResult = callback(accumulator, array[i], i, array);
+    if (iterationResult instanceof LastClass) {
+      accumulator = iterationResult.value;
+      break;
+    }
+    accumulator = iterationResult;
+  }
+  return accumulator;
+}
+function filter(array, callback) {
+  const result = [];
+  for (let i = 0; i < array.length; i++) {
+    const iterationResult = callback(array[i], i, array);
+    if (iterationResult instanceof LastClass) {
+      if (iterationResult.value) {
+        result.push(array[i]);
+      }
+      return result;
+    }
+    if (iterationResult === Break) {
+      return result;
+    }
+    if (iterationResult) {
+      result.push(array[i]);
+    }
+  }
+  return result;
+}
+function mapValues(object, callback) {
+  const result = {};
+  for (const key in object) {
+    if (object.hasOwnProperty(key)) {
+      const iterationResult = callback(object[key], key, object);
+      if (iterationResult === Break) {
+        break;
+      }
+      if (iterationResult instanceof LastClass) {
+        result[key] = iterationResult.value;
+        break;
+      }
+      result[key] = iterationResult;
+    }
+  }
+  return result;
+}
+function mapEntries(object, callback) {
+  return map(entries(object), callback);
+}
+function mapKeys(object, callback) {
+  return map(keys(object), callback);
+}
+function forEachValues(object, callback) {
+  for (const key in object) {
+    if (object.hasOwnProperty(key)) {
+      const iterationResult = callback(object[key], key, object);
+      if (iterationResult === Break) {
+        break;
+      }
+    }
+  }
+}
+function forEachEntries(object, callback) {
+  forEach(entries(object), callback);
+}
+function forEachKeys(object, callback) {
+  forEach(keys(object), callback);
+}
+function reduceValues(object, callback, initialValue) {
+  let accumulator = initialValue;
+  for (const key in object) {
+    if (object.hasOwnProperty(key)) {
+      const iterationResult = callback(accumulator, object[key], key, object);
+      if (iterationResult instanceof LastClass) {
+        accumulator = iterationResult.value;
+        break;
+      }
+      accumulator = iterationResult;
+    }
+  }
+  return accumulator;
+}
+function reduceEntries(object, callback, initialValue) {
+  return reduce(entries(object), callback, initialValue);
+}
+function reduceKeys(object, callback, initialValue) {
+  return reduce(keys(object), callback, initialValue);
+}
+function filterValues(object, callback) {
+  const result = {};
+  for (const key in object) {
+    if (object.hasOwnProperty(key)) {
+      const iterationResult = callback(object[key], key, object);
+      if (iterationResult instanceof LastClass) {
+        if (iterationResult.value) {
+          result[key] = object[key];
+        }
+        return result;
+      }
+      if (iterationResult === Break) {
+        return result;
+      }
+      if (iterationResult) {
+        result[key] = object[key];
+      }
+    }
+  }
+  return result;
+}
+function filterKeys(object, callback) {
+  return filter(keys(object), callback);
+}
+function filterEntries(object, callback) {
+  return filter(entries(object), callback);
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
@@ -288,5 +464,23 @@ async function asyncFilterEntriesParallel(object, callback) {
   asyncReduce,
   asyncReduceEntries,
   asyncReduceKeys,
-  asyncReduceValues
+  asyncReduceValues,
+  entries,
+  filter,
+  filterEntries,
+  filterKeys,
+  filterValues,
+  forEach,
+  forEachEntries,
+  forEachKeys,
+  forEachValues,
+  keys,
+  map,
+  mapEntries,
+  mapKeys,
+  mapValues,
+  reduce,
+  reduceEntries,
+  reduceKeys,
+  reduceValues
 });

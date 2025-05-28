@@ -1,4 +1,7 @@
 import {
+  Break,
+  Last,
+
   asyncMap,
   asyncForEach,
   asyncReduce,
@@ -36,15 +39,22 @@ import {
   asyncFilterKeysParallel,
   asyncFilterEntriesParallel,
 
-  Break,
-  Last,
+  map,
+  forEach,
+  reduce,
+  filter,
+  mapValues,
+  mapKeys,
+  mapEntries,
+  forEachEntries,
+  forEachKeys,
+  reduceValues,
+  reduceEntries,
+  reduceKeys,
+  filterValues,
+  filterKeys,
+  filterEntries, forEachValues, entries, keys,
 } from './index';
-
-enum SomeEnum {
-  foo = 'foo',
-  bar = 'bar',
-}
-type ComplexType = { one: SomeEnum, two: `${string}-${number}` };
 
 describe('asyncCollections', () => {
   describe('asyncMap', () => {
@@ -68,7 +78,6 @@ describe('asyncCollections', () => {
       });
       expect(result).toEqual([2, 20]);
     });
-
   });
 
   describe('asyncForEach', () => {
@@ -543,6 +552,401 @@ describe('asyncCollections', () => {
       const obj = { a: 1, b: 2, c: 3 };
       const result = await asyncFilterEntriesParallel(obj, async ([key, value]) => value < 3);
       expect(result).toEqual([['a', 1], ['b', 2]]);
+    });
+  });
+
+  describe('sync', () => {
+    describe('map', () => {
+      it('should map values', () => {
+        const result = map([1, 2, 3], (value) => value * 2);
+        expect(result).toEqual([2, 4, 6]);
+      });
+
+      it('should break on encountering Break', () => {
+        const result = map([1, 2, 3], (value) => {
+          if (value === 2) return Break;
+          return value * 2;
+        });
+        expect(result).toEqual([2]);
+      });
+
+      it('should save value and break on encountering Last', () => {
+        const result = map([1, 2, 3], (value) => {
+          if (value === 2) return Last(value * 10);
+          return value * 2;
+        });
+        expect(result).toEqual([2, 20]);
+      });
+    });
+
+    describe('forEach', () => {
+      it('should loop over values', () => {
+        const mockCallback = vi.fn();
+        const data = [1, 2, 3];
+        forEach(data, mockCallback);
+        expect(mockCallback).toHaveBeenCalledTimes(3);
+        expect(mockCallback.mock.calls).toEqual([[1, 0, data], [2, 1, data], [3, 2, data]]);
+      });
+
+      it('should break on encountering Break', () => {
+        const mockCallback: any = vi.fn((value: number) => {
+          if (value === 2) return Break;
+        });
+        const data = [1, 2, 3];
+        forEach(data, mockCallback);
+        expect(mockCallback).toHaveBeenCalledTimes(2);
+        expect(mockCallback.mock.calls).toEqual([[1, 0, data], [2, 1, data]]);
+      });
+    });
+
+    describe('reduce', () => {
+      it('should reduce values', () => {
+        const result = reduce([1, 2, 3], (acc, value) => acc + value, 0);
+        expect(result).toBe(6);
+      });
+
+      it('should break and save value on encountering Last', () => {
+        const result = reduce(
+          [1, 2, 3],
+          (acc, value) => {
+            if (value === 2) return Last(acc + value * 10);
+            return acc + value;
+          },
+          0,
+        );
+        expect(result).toBe(21);
+      });
+    });
+
+    describe('filter', () => {
+      it('should filter values', () => {
+        const result = filter([1, 2, 3], (value) => value < 3);
+        expect(result).toEqual([1, 2]);
+      });
+
+      it('should break on encountering Break', () => {
+        const result = filter([1, 2, 3], (value) => {
+          if (value === 2) return Break;
+          return true;
+        });
+        expect(result).toEqual([1]);
+      });
+
+      it('should save value and break on encountering Last #1', () => {
+        const result = filter([1, 2, 3], (value) => {
+          if (value === 2) return Last(true);
+          return true;
+        });
+        expect(result).toEqual([1, 2]);
+      });
+
+      it('should save value and break on encountering Last #2', () => {
+        const result = filter([1, 2, 3], (value) => {
+          if (value === 2) return Last(false);
+          return true;
+        });
+        expect(result).toEqual([1]);
+      });
+    });
+
+    describe('mapValues', () => {
+      it('should map object values', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = mapValues(obj, (value) => value * 2);
+        expect(result).toEqual({ a: 2, b: 4, c: 6 });
+      });
+
+      it('should break on encountering Break', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = mapValues(obj, (value, key) => {
+          if (key === 'b') return Break;
+          return value * 2;
+        });
+        expect(result).toEqual({ a: 2 });
+      });
+
+      it('should save value and break on encountering Last', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = mapValues(obj, (value, key) => {
+          if (key === 'b') return Last(value * 10);
+          return value * 2;
+        });
+        expect(result).toEqual({ a: 2, b: 20 });
+      });
+    });
+
+    describe('mapEntries', () => {
+      it('should map object entries', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = mapEntries(obj, ([key, value]) => `${key}:${value}`);
+        expect(result).toEqual(['a:1', 'b:2', 'c:3']);
+      });
+
+      it('should break on encountering Break', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = mapEntries(obj, ([key, value]) => {
+          if (key === 'b') return Break;
+          return `${key}:${value}`;
+        });
+        expect(result).toEqual(['a:1']);
+      });
+
+      it('should save value and break on encountering Last', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = mapEntries(obj, ([key, value]) => {
+          if (key === 'b') return Last(`${key}:${value}`);
+          return `${key}:${value}`;
+        });
+        expect(result).toEqual(['a:1', 'b:2']);
+      });
+    });
+
+    describe('mapKeys', () => {
+      it('should map object keys', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = mapKeys(obj, (key) => key.toUpperCase());
+        expect(result).toEqual(['A', 'B', 'C']);
+      });
+
+      it('should break on encountering Break', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = mapKeys(obj, (key) => {
+          if (key === 'b') return Break;
+          return key;
+        });
+        expect(result).toEqual(['a']);
+      });
+
+      it('should save value and break on encountering Last', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = mapKeys(obj, (key) => {
+          if (key === 'b') return Last(key);
+          return key;
+        });
+        expect(result).toEqual(['a', 'b']);
+      });
+    });
+
+    describe('forEachValues', () => {
+      it('should loop over object values', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const mockCallback = vi.fn();
+        forEachValues(obj, mockCallback);
+        expect(mockCallback).toHaveBeenCalledTimes(3);
+        expect(mockCallback.mock.calls).toEqual([[1, 'a', obj], [2, 'b', obj], [3, 'c', obj]]);
+      });
+
+      it('should break on encountering Break', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const mockCallback: any = vi.fn((value: number) => {
+          if (value === 2) return Break;
+        });
+        forEachValues(obj, mockCallback);
+        expect(mockCallback).toHaveBeenCalledTimes(2);
+        expect(mockCallback.mock.calls).toEqual([[1, 'a', obj], [2, 'b', obj]]);
+      });
+    });
+
+    describe('forEachEntries', () => {
+      it('should loop over object entries', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const mockCallback = vi.fn();
+        forEachEntries(obj, mockCallback);
+        expect(mockCallback).toHaveBeenCalledTimes(3);
+        expect(mockCallback.mock.calls).toEqual([
+          [['a', 1], 0, [['a', 1], ['b', 2], ['c', 3]]],
+          [['b', 2], 1, [['a', 1], ['b', 2], ['c', 3]]],
+          [['c', 3], 2, [['a', 1], ['b', 2], ['c', 3]]],
+        ]);
+      });
+
+      it('should break on encountering Break', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const mockCallback: any = vi.fn(([, value]: [string, number]) => {
+          if (value === 2) return Break;
+        });
+        forEachEntries(obj, mockCallback);
+        expect(mockCallback).toHaveBeenCalledTimes(2);
+        expect(mockCallback.mock.calls).toEqual([
+          [['a', 1], 0, [['a', 1], ['b', 2], ['c', 3]]],
+          [['b', 2], 1, [['a', 1], ['b', 2], ['c', 3]]],
+        ]);
+      });
+    });
+
+    describe('forEachKeys', () => {
+      it('should loop over object keys', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const mockCallback = vi.fn();
+        forEachKeys(obj, mockCallback);
+        expect(mockCallback).toHaveBeenCalledTimes(3);
+        expect(mockCallback.mock.calls).toEqual([
+          ['a', 0, ['a', 'b', 'c']],
+          ['b', 1, ['a', 'b', 'c']],
+          ['c', 2, ['a', 'b', 'c']],
+        ]);
+      });
+
+      it('should break on encountering Break', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const mockCallback: any = vi.fn((value: string) => {
+          if (value === 'b') return Break;
+        });
+        forEachKeys(obj, mockCallback);
+        expect(mockCallback).toHaveBeenCalledTimes(2);
+        expect(mockCallback.mock.calls).toEqual([['a', 0, ['a', 'b', 'c']], ['b', 1, ['a', 'b', 'c']]]);
+      });
+    });
+
+    describe('reduceValues', () => {
+      it('should reduce object values', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = reduceValues(obj, (acc, value) => acc + value, 0);
+        expect(result).toBe(6);
+      });
+
+      it('should break and save value on encountering Last', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = reduceValues(obj, (acc, value, key) => {
+          if (key === 'b') return Last(acc + value * 10);
+          return acc + value;
+        }, 0);
+        expect(result).toBe(21);
+      });
+    });
+
+    describe('reduceEntries', () => {
+      it('should reduce object entries', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = reduceEntries(obj, (acc, [key, value]) => acc + value, 0);
+        expect(result).toBe(6);
+      });
+
+      it('should break and save value on encountering Last', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = reduceEntries(obj, (acc, [key, value]) => {
+          if (key === 'b') return Last(acc + key);
+          return acc + key;
+        }, '');
+        expect(result).toBe('ab');
+      });
+    });
+
+    describe('reduceKeys', () => {
+      it('should reduce object keys', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = reduceKeys(obj, (acc, key) => acc + key, '');
+        expect(result).toBe('abc');
+      });
+
+      it('should break and save value on encountering Last', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = reduceKeys(obj, (acc, key) => {
+          if (key === 'b') return Last(acc + key);
+          return acc + key;
+        }, '');
+        expect(result).toBe('ab');
+      });
+    });
+
+    describe('filterValues', () => {
+      it('should filter object values', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = filterValues(obj, (value) => value < 3);
+        expect(result).toEqual({ a: 1, b: 2 });
+      });
+
+      it('should break on encountering Break', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = filterValues(obj, (value, key) => {
+          if (key === 'b') return Break;
+          return true;
+        });
+        expect(result).toEqual({ a: 1 });
+      });
+
+      it('should save value and break on encountering Last', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = filterValues(obj, (value, key) => {
+          if (key === 'b') return Last(true);
+          return true;
+        });
+        expect(result).toEqual({ a: 1, b: 2 });
+      });
+    });
+
+    describe('filterKeys', () => {
+      it('should filter object keys', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = filterKeys(obj, (key) => key !== 'b');
+        expect(result).toEqual(['a', 'c']);
+      });
+
+      it('should break on encountering Break', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = filterKeys(obj, (key) => {
+          if (key === 'b') return Break;
+          return true;
+        });
+        expect(result).toEqual(['a']);
+      });
+
+      it('should save value and break on encountering Last', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = filterKeys(obj, (key) => {
+          if (key === 'b') return Last(true);
+          return true;
+        });
+        expect(result).toEqual(['a', 'b']);
+      });
+    });
+
+    describe('filterEntries', () => {
+      it('should filter object entries', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = filterEntries(obj, ([key, value]) => value < 3);
+        expect(result).toEqual([['a', 1], ['b', 2]]);
+      });
+
+      it('should break on encountering Break', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = filterEntries(obj, ([key, value]) => {
+          if (key === 'b') return Break;
+          return true;
+        });
+        expect(result).toEqual([['a', 1]]);
+      });
+
+      it('should save value and break on encountering Last', () => {
+        const obj = { a: 1, b: 2, c: 3 };
+        const result = filterEntries(obj, ([key, value]) => {
+          if (key === 'b') return Last(true);
+          return true;
+        });
+        expect(result).toEqual([['a', 1], ['b', 2]]);
+      });
+    });
+  });
+
+  describe('helpers', () => {
+    it('entries', () => {
+      enum SomeEnum {
+        foo = 'foo',
+        bar = 'bar',
+      }
+      const obj = { [SomeEnum.foo]: 1, [SomeEnum.bar]: 2 };
+      const result = entries(obj);
+      expect(result).toEqual([[SomeEnum.foo, 1], [SomeEnum.bar, 2]]);
+    });
+
+    it('keys', () => {
+      enum SomeEnum {
+        foo = 'foo',
+        bar = 'bar',
+      }
+      const obj = { [SomeEnum.foo]: 1, [SomeEnum.bar]: 2 };
+      const result = keys(obj);
+      expect(result).toEqual([SomeEnum.foo, SomeEnum.bar]);
     });
   });
 });

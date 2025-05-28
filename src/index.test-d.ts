@@ -39,6 +39,16 @@ import {
   asyncFilterValuesParallel,
   asyncFilterEntriesParallel,
   asyncFilterKeysParallel,
+
+  /* sync */
+  mapValues,
+  mapEntries,
+  mapKeys,
+  forEachValues,
+  forEachEntries,
+  forEachKeys,
+  reduceValues,
+  reduceEntries, reduceKeys, filterValues, filterKeys, filterEntries, map, forEach, reduce, filter,
 } from './index';
 
 describe('sequential helpers – array', () => {
@@ -93,7 +103,7 @@ describe('sequential helpers – object', () => {
   });
 
   it('asyncMapKeys returns an array of U', () => {
-    const promise = asyncMapKeys(obj, async k => k.toUpperCase());
+    const promise = asyncMapKeys(obj, async key => key.toUpperCase());
     expectTypeOf(promise).toEqualTypeOf<Promise<string[]>>();
   });
 
@@ -117,7 +127,7 @@ describe('sequential helpers – object', () => {
   });
 
   it('asyncFilterKeys returns an array of keys', () => {
-    const promise = asyncFilterKeys(obj, async k => k === 'a');
+    const promise = asyncFilterKeys(obj, async key => key === 'a');
     expectTypeOf(promise).toEqualTypeOf<Promise<('a' | 'b')[]>>();
   });
 
@@ -180,5 +190,121 @@ describe('parallel helpers – object', () => {
   it('asyncFilterEntriesParallel returns entry array', () => {
     const promise = asyncFilterEntriesParallel(obj, async ([, value]) => value > 1);
     expectTypeOf(promise).toEqualTypeOf<Promise<[ 'foo' | 'bar', 1 | 2][]>>();
+  });
+});
+
+describe('sync helpers – array', () => {
+  it('map infers U[]', () => {
+    const out = map([1, 2, 3], value => value.toString());
+    expectTypeOf(out).toEqualTypeOf<string[]>();
+  });
+
+  it('map allows Break without changing U[]', () => {
+    const out = map([1, 2, 3], value => (value > 1 ? Break : value * 2));
+    expectTypeOf(out).toEqualTypeOf<number[]>();
+  });
+
+  it('map allows Last without changing U[]', () => {
+    const out = map([1, 2, 3], value => (value === 2 ? Last(value * 10) : value * 10));
+    expectTypeOf(out).toEqualTypeOf<number[]>();
+  });
+
+  it('forEach returns void', () => {
+    const out = forEach(['a', 'b'], () => {});
+    expectTypeOf(out).toEqualTypeOf<void>();
+  });
+
+  it('reduce infers accumulator type', () => {
+    const out = reduce([1, 2, 3], (acc, value) => acc + value, 0);
+    expectTypeOf(out).toEqualTypeOf<number>();
+  });
+
+  it('filter returns T[]', () => {
+    const out = filter([1, 2, 3], value => value > 1);
+    expectTypeOf(out).toEqualTypeOf<number[]>();
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/*                         Sequential helpers — object                        */
+/* -------------------------------------------------------------------------- */
+
+describe('sync helpers – object', () => {
+  const obj = { a: 1, b: 2 } as const;
+
+  /* ---------- map ---------- */
+  it('mapValues returns Record<Key, U>', () => {
+    const out = mapValues(obj, value => value.toString());
+    expectTypeOf(out).toEqualTypeOf<Record<'a' | 'b', string>>();
+  });
+
+  it('mapEntries returns U[]', () => {
+    const out = mapEntries(obj, ([key]) => key);
+    expectTypeOf(out).toEqualTypeOf<('a' | 'b')[]>();
+  });
+
+  it('mapKeys returns U[]', () => {
+    const out = mapKeys(obj, key => key.toUpperCase());
+    expectTypeOf(out).toEqualTypeOf<string[]>();
+  });
+
+  /* ---------- forEach ---------- */
+  it('forEachValues returns void', () => {
+    const out = forEachValues(obj, () => {});
+    expectTypeOf(out).toEqualTypeOf<void>();
+  });
+
+  it('forEachEntries returns void', () => {
+    const out = forEachEntries(obj, () => {});
+    expectTypeOf(out).toEqualTypeOf<void>();
+  });
+
+  it('forEachKeys returns void', () => {
+    const out = forEachKeys(obj, () => {});
+    expectTypeOf(out).toEqualTypeOf<void>();
+  });
+
+  /* ---------- reduce ---------- */
+  it('reduceValues infers accumulator type', () => {
+    const out = reduceValues(
+      obj,
+      (acc, value) => acc + value,
+      0,
+    );
+    expectTypeOf(out).toEqualTypeOf<number>();
+  });
+
+  it('reduceEntries infers accumulator type', () => {
+    const out = reduceEntries(
+      obj,
+      (acc, [, value]) => acc + value,
+      0,
+    );
+    expectTypeOf(out).toEqualTypeOf<number>();
+  });
+
+  it('reduceKeys infers accumulator type', () => {
+    const out = reduceKeys(
+      obj,
+      (acc, k) => acc + k,
+      '',
+    );
+    expectTypeOf(out).toEqualTypeOf<string>();
+  });
+
+  /* ---------- filter ---------- */
+  it('filterValues returns Record<string, T>', () => {
+    const out = filterValues(obj, value => value > 1);
+    expectTypeOf(out).toEqualTypeOf<Record<'a' | 'b', 1 | 2>>();
+  });
+
+  it('filterKeys returns StringifiedObjectKey<TKey>[]', () => {
+    const out = filterKeys(obj, key => key === 'a');
+    expectTypeOf(out).toEqualTypeOf<('a' | 'b')[]>();
+  });
+
+  it('filterEntries returns entry array', () => {
+    const out = filterEntries(obj, ([, value]) => value > 1);
+    expectTypeOf(out).toEqualTypeOf<['a' | 'b', 1 | 2][]>();
   });
 });

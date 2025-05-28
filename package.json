@@ -1,6 +1,6 @@
 {
   "name": "async-collection-utils",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -10,18 +10,23 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Lukasz-pluszczewski/simple-express"
+    "url": "https://github.com/Lukasz-pluszczewski/async-collection-utils"
   },
   "author": "Łukasz Pluszczewski",
   "bugs": {
-    "url": "https://github.com/Lukasz-pluszczewski/simple-express/issues"
+    "url": "https://github.com/Lukasz-pluszczewski/async-collection-utils/issues"
   },
-  "homepage": "https://github.com/Lukasz-pluszczewski/simple-express",
+  "homepage": "https://github.com/Lukasz-pluszczewski/async-collection-utils",
   "keywords": [
-    "express",
-    "framework",
-    "simple",
-    "node"
+    "async",
+    "forEach",
+    "map",
+    "reduce",
+    "filter",
+    "entries",
+    "keys",
+    "object",
+    "array"
   ],
   "license": "MIT",
   "devDependencies": {
