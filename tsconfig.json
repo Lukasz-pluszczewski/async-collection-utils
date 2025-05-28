@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "noErrorTruncation": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strictFunctionTypes": false,
+    "types": ["vitest/globals"]
+  },
+}

@@ -1,0 +1,34 @@
+{
+  "name": "async-collection-utils",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup-node src/index.ts --dts",
+    "test": "vitest --globals --typecheck",
+    "generateToc": "markdown-toc --bullets=\"*\" --no-firsth1 README.md"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Lukasz-pluszczewski/simple-express"
+  },
+  "author": "Łukasz Pluszczewski",
+  "bugs": {
+    "url": "https://github.com/Lukasz-pluszczewski/simple-express/issues"
+  },
+  "homepage": "https://github.com/Lukasz-pluszczewski/simple-express",
+  "keywords": [
+    "express",
+    "framework",
+    "simple",
+    "node"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.15.23",
+    "markdown-toc": "^1.2.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
+  }
+}
