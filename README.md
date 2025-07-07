@@ -1,6 +1,6 @@
 # Async Utility Functions
 
-A collection of map, forEach, reduce, mapValues, filter etc. utility functions for both arrays and plain objects accepting asynchronous callbacks, with both sequential and parallel versions.
+A well tested and typed collection of map, forEach, reduce, filter etc. utility functions supporting arrays, sets, maps, plain objects, iterators in both async and synchronous versions.
 
 * [Core Concepts](#core-concepts)
 * [Usage](#usage)
@@ -17,104 +17,73 @@ A collection of map, forEach, reduce, mapValues, filter etc. utility functions f
 * [Changelog](#changelog)
 
 ## Core Concepts
+Each method (except for "forEach" and all "toArray" utilities) returns the same type as the input: asyncMap(new Map(), () => {}) returns Promise<Map> etc.
+
+
 
 - **Break**: A symbol that can be returned to stop the iteration.
 - **Last**: A utility that wraps a value. When returned, it stops the iteration and the provided value becomes the final output.
 
 ## Usage
-### Import
+### Basic
 ```javascript
-import { asyncMap, asyncForEach, asyncMapParallel, Break, Last } from 'async-collection-utils';
+import { asyncMap, asyncReduce, Break, Last } from 'async-collection-utils';
+
+const data = [1, 2, 3];
+const result = await asyncMap(data, async (item) => item * 2);
+// result: [2, 4, 6]
+
+const data = new Set([1, 2, 3]);
+const result = await asyncMap(data, async (item) => item + 1);
+// result: Set { 2, 3, 4 }
+
+const data = { a: 1, b: 2, c: 3 };
+const result = await asyncMap(data, async (value, key) => value + key);
+// result: { a: '1a', b: '2b', c: '3c' }
+
+const cursor = model.find({}).cursor();
+const result = await asyncReduce(cursor, async (acc, item) => acc + item.value, 0);
+// result: number
 ```
 
-### Array Utilities
+### Utilities table
+Each type of utility has both async and sync versions. These return the same type as the input. The "toArray" utilities accept the same input but always return an array.
 
-#### Sequential
+|               | map | flatMap | filter | reduce | forEach |
+|:--------------|:---:|:-------:|:------:|:------:|:-------:|
+| async         |  ✅  |    ✅    |   ✅    |   ✅    |    ✅    |
+| sync          |  ✅  |    ✅    |   ✅    |   ✅    |    ✅    |
+| toArray async |  ✅  |    ✅    |   ✅    |  n/a   |   n/a   |
+| toArray sync  |  ✅  |    ✅    |   ✅    |  n/a   |   n/a   |
 
-- `asyncMap`: Iterates over the array, applies a given asynchronous function, and returns a new array.
-    ```javascript
-    const data = [1, 2, 3];
-    const result = await asyncMap(data, async (item) => item * 2);
-    // result: [2, 4, 6]
-    ```
+### Input/output support map
 
-- `asyncForEach`: Iterates over the array. Does not return a value.
-    ```javascript
-    const data = [1, 2, 3];
-    await asyncForEach(data, async (item) => console.log(item));
-    ```
+|                                       | Array<T>          | Set<T>            | Map<K, T>          | Record<K, T>          | TypedArray<T>          | Iterable<T>                | AsyncIterable<T>           |
+|---------------------------------------|-------------------|-------------------|--------------------|-----------------------|------------------------|----------------------------|----------------------------|
+| asyncMap<TInput, R>                   | Promise<Array<R>> | Promise<Set<R>>   | Promise<Map<K, R>> | Promise<Record<K, R>> | Promise<TypedArray<R>> | Promise<AsyncGenerator<R>> | Promise<AsyncGenerator<R>> |
+| map<TInput, R>                        | Array<R>          | Set<R>            | Map<K, R>          | Record<K, R>          | TypedArray<R>          | Generator<R>               | ❌                          |
+| asyncMapToArray<TInput, R>            | Promise<Array<R>> | Promise<Array<R>> | Promise<Array<R>>  | Promise<Array<R>>     | Promise<Array<R>>      | Promise<Array<R>>          | Promise<Array<R>>          |
+| mapToArray<TInput, R>                 | Array<R>          | Array<R>          | Array<R>           | Array<R>              | Array<R>               | Array<R>                   | ❌                          |
+| asyncFlatMap<TInput, R \| R[]>        | Promise<Array<R>> | Promise<Set<R>>   | ❌                  | ❌                     | Promise<TypedArray<R>> | Promise<AsyncGenerator<R>> | Promise<AsyncGenerator<R>> |
+| flatMap<TInput, R \| R[]>             | Array<R>          | Set<R>            | ❌                  | ❌                     | TypedArray<R>          | Generator<R>               | ❌                          |
+| asyncFlatMapToArray<TInput, R \| R[]> | Promise<Array<R>> | Promise<Array<R>> | Promise<Array<R>>  | Promise<Array<R>>     | Promise<Array<R>>      | Promise<Array<R>>          | Promise<Array<R>>          |
+| flatMapToArray<TInput, R \| R[]>      | Array<R>          | Array<R>          | Array<R>           | Array<R>              | Array<R>               | Array<R>                   | ❌                          |
+| asyncFilter<TInput, boolean>          | Promise<Array<R>> | Promise<Set<R>>   | Promise<Map<K, R>> | Promise<Record<K, R>> | Promise<TypedArray<R>> | Promise<AsyncGenerator<R>> | Promise<AsyncGenerator<R>> |   
+| filter<TInput, boolean>               | Array<R>          | Set<R>            | Map<K, R>          | Record<K, R>          | TypedArray<R>          | Generator<R>               | ❌                          |  
+| asyncFilterToArray<TInput, boolean>   | Promise<Array<R>> | Promise<Array<R>> | Promise<Array<R>>  | Promise<Array<R>>     | Promise<Array<R>>      | Promise<Array<R>>          | Promise<Array<R>>          |   
+| filterToArray<TInput, boolean>        | Array<R>          | Array<R>          | Array<R>           | Array<R>              | Array<R>               | Array<R>                   | ❌                          |  
+| asyncReduce<TInput, R>                | Promise<R>        | Promise<R>        | Promise<R>         | Promise<R>            | Promise<R>             | Promise<R>                 | Promise<R>                 |
+| reduce<TInput, R>                     | R                 | R                 | R                  | R                     | R                      | R                          | ❌                          |
+| asyncForEach<TInput, void>            | void              | void              | void               | void                  | void                   | void                       | void                       |
+| forEach<TInput, void>                 | void              | void              | void               | void                  | void                   | void                       | ❌                          |
 
-- `asyncReduce`: Reduces the array using an asynchronous function.
-    ```javascript
-    const data = [1, 2, 3];
-    const sum = await asyncReduce(data, async (acc, item) => acc + item, 0);
-    // result: 6
-    ```
-- `asyncFilter`: Iterates over the array and returns new array from elements for which async callback returned true.
-   ```javascript
-   const data = [1, 2, 3];
-   const result = await asyncFilter(data, async (item) => item < 3);
-   // result: [1, 2]
-   ```
-
-
-#### Parallel
-These are equvalent to the above, but execute all operations in parallel.
-- `asyncMapParallel`
-- `asyncForEachParallel`
-- `asyncFilterParallel`
-
-### Object Utilities
-
-#### Sequential
-
-- `asyncMapValues`: Iterates over the object's values, applies a given asynchronous function, and returns a new object.
-    ```javascript
-    const obj = { a: 1, b: 2 };
-    const result = await asyncMapValues(obj, async (value) => value * 2);
-    // result: { a: 2, b: 4 }
-    ```
-
-- `asyncForEachValues`: Iterates over the object's values.
-- `asyncReduceValues`: Reduces the object's values using an asynchronous function.
-- `asyncFilterValues`: Filters the object values and returns new object.
-- `asyncMapEntries`: Iterates over the object's entries, applies a given asynchronous function, and returns a resulting array.
-    ```javascript
-    const obj = { a: 1, b: 2 };
-    const result = await asyncMapEntries(obj, async ([key, value]) => value * 2);
-    // result: [2, 4]
-    ```
-- `asyncForEachEntries`: Iterates over the object's entries.
-- `asyncReduceEntries`: Reduces the object's entries using an asynchronous function.
-- `asyncFilterEntries`: Filters object entries and returns new array of entries
-- `asyncMapKeys`: Iterates over the object's keys, applies a given asynchronous function, and returns a resulting array.
-    ```javascript
-    const obj = { a: 1, b: 2 };
-    const result = await asyncMapKeys(obj, async (key) => key.toUpperCase());
-    // result: ['A', 'B']
-    ```
-- `asyncForEachKeys`: Iterates over the object's keys.
-- `asyncReduceKeys`: Reduces the object's keys using an asynchronous function.
-- `asyncFilterKeys`: Filters the array of keys and returns new array of keys.
-
-#### Parallel
-These are equvalent to the above, but execute all operations in parallel.
-- `asyncMapValuesParallel`
-- `asyncForEachValuesParallel`
-- `asyncFilterValuesParallel`
-- `asyncMapEntriesParallel`
-- `asyncForEachEntriesParallel`
-- `asyncFilterEntriesParallel`
-- `asyncMapKeysParallel`
-- `asyncForEachKeysParallel`
-- `asyncFilterKeysParallel`
 
 ### Using Break and Last
-You can use `Break` to finish the iteration early in all `map`, `forEach` and `filter` functions.
+You can use `Break` to finish the iteration early in all functions.
 
 ```javascript
 const data = [1, 2, 3, 4, 5];
-const result = await asyncMap(data, async (item) => {
+const result = await asyncFlatMap(data, async (item) => {
   if (item === 3) return Break;
   return item * 2;
 });
@@ -123,7 +92,7 @@ const result = await asyncMap(data, async (item) => {
 
 ```javascript
 const data = { a: 1, b: 2, c: 3, d: 4, e: 5 };
-const result = await asyncMapValues(data, async (value) => {
+const result = await asyncMap(data, async (value) => {
   if (value === 3) return Break;
   return value * 2;
 });
@@ -134,7 +103,7 @@ You can use `Last` wrapper, to finish the iteration early while still returning 
 
 ```javascript
 const data = [1, 2, 3, 4, 5];
-const result = await asyncMap(data, async (item) => {
+const result = await asyncFlatMap(data, async (item) => {
   if (item === 3) return Last(item * 2);
   return item * 2;
 });
@@ -149,27 +118,6 @@ const reduced = await asyncReduce(data, async (acc, item) => {
 }, 0);
 // result: 6
 ```
-
-### Synchronous
-For convenience, library also exports synchronous versions of the utilities, with the same interfaces.
-
-Available synchronous utilities:
-- `map`
-- `forEach`
-- `reduce`
-- `filter`
-- `mapValues`
-- `mapKeys`
-- `mapEntries`
-- `forEachValues`
-- `forEachKeys`
-- `forEachEntries`
-- `reduceValues`
-- `reduceKeys`
-- `reduceEntries`
-- `filterValues`
-- `filterKeys`
-- `filterEntries`
 
 ### Helpers
 Two helpers used internally are exported as well:
@@ -208,3 +156,29 @@ Two helpers used internally are exported as well:
 ### 1.1.0
 - Added synchronous utilities
 - Added `entries` and `keys` helpers
+
+### 2.0.0
+- BREAKING CHANGE: complete rewrite of the library 
+- All async utilities accept: arrays, sets, maps, typed arrays, iterators, async iterators and plain objects and return the same type as the input
+- All async utilities have sync counterparts
+- All sync utilities accept: arrays, sets, maps, typed arrays, iterators, and plain objects and return the same type as the input
+- Utilities available:
+  - asyncMap
+  - map
+  - asyncMapToArray
+  - mapToArray
+  - asyncFlatMap
+  - flatMap
+  - asyncFlatMapToArray
+  - flatMapToArray
+  - asyncFilter
+  - filter
+  - asyncFilterToArray
+  - filterToArray
+  - asyncReduce
+  - reduce
+  - asyncForEach
+  - forEach
+  - batch
+  - entries
+  - keys

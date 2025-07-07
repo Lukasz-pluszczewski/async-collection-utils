@@ -17,6 +17,7 @@
 /demo
 .esdoc.json
 .idea
+bun.lock
 
 npm-debug.log*
 yarn-debug.log*
