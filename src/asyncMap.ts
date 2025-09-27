@@ -1,11 +1,4 @@
-import {
-  Break,
-  CustomAsyncIterable,
-  CustomIterable,
-  isPlainObject,
-  LastClass,
-  TypedArray,
-} from "./shared";
+import { Break, isPlainObject, LastClass, TypedArray } from "./shared";
 
 export async function asyncMap<TCollection extends unknown[], TUpdateValue>(
   array: TCollection,
@@ -51,26 +44,24 @@ export async function asyncMap<TCollection extends TypedArray>(
 ): Promise<TCollection>;
 
 export async function asyncMap<
-  TCollection extends CustomIterable<unknown, unknown>,
+  TCollection extends Iterable<unknown, unknown>,
   TUpdateValue,
 >(
   iterable: TCollection,
   callback: (
-    item: TCollection extends CustomIterable<infer TValue, unknown>
-      ? TValue
-      : never,
+    item: TCollection extends Iterable<infer TValue, unknown> ? TValue : never,
     index: number,
     iterable: TCollection,
   ) => Promise<TUpdateValue | typeof Break | LastClass<TUpdateValue>>,
 ): Promise<AsyncGenerator<TUpdateValue>>;
 
 export async function asyncMap<
-  TCollection extends CustomAsyncIterable<unknown, unknown>,
+  TCollection extends AsyncIterable<unknown, unknown>,
   TUpdateValue,
 >(
   asyncIterable: TCollection,
   callback: (
-    item: TCollection extends CustomAsyncIterable<infer TValue, unknown>
+    item: TCollection extends AsyncIterable<infer TValue, unknown>
       ? TValue
       : never,
     index: number,

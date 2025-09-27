@@ -1,4 +1,4 @@
-import { Break, CustomIterable, isPlainObject, TypedArray } from "./shared";
+import { Break, isPlainObject, TypedArray } from "./shared";
 
 export function forEach<TCollection extends unknown[]>(
   array: TCollection,
@@ -36,12 +36,10 @@ export function forEach<TCollection extends TypedArray>(
   ) => void | typeof Break,
 ): void;
 
-export function forEach<TCollection extends CustomIterable<unknown, unknown>>(
+export function forEach<TCollection extends Iterable<unknown, unknown>>(
   iterable: TCollection,
   callback: (
-    item: TCollection extends CustomIterable<infer TValue, unknown>
-      ? TValue
-      : never,
+    item: TCollection extends Iterable<infer TValue, unknown> ? TValue : never,
     index: number,
     iterable: TCollection,
   ) => void | typeof Break,

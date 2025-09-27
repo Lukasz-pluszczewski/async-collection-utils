@@ -1,11 +1,4 @@
-import {
-  Break,
-  CustomAsyncIterable,
-  CustomIterable,
-  isPlainObject,
-  LastClass,
-  TypedArray,
-} from "./shared";
+import { Break, isPlainObject, LastClass, TypedArray } from "./shared";
 
 export async function asyncReduce<
   TCollection extends unknown[],
@@ -66,17 +59,15 @@ export async function asyncReduce<
 ): Promise<TAccumulator>;
 
 export async function asyncReduce<
-  TCollection extends CustomIterable<unknown, unknown>,
-  TAccumulator = TCollection extends CustomIterable<infer TValue, unknown>
+  TCollection extends Iterable<unknown, unknown>,
+  TAccumulator = TCollection extends Iterable<infer TValue, unknown>
     ? TValue
     : never,
 >(
   iterable: TCollection,
   callback: (
     acc: TAccumulator,
-    item: TCollection extends CustomIterable<infer TValue, unknown>
-      ? TValue
-      : never,
+    item: TCollection extends Iterable<infer TValue, unknown> ? TValue : never,
     index: number,
     iterable: TCollection,
   ) => Promise<TAccumulator | typeof Break | LastClass<TAccumulator>>,
@@ -84,15 +75,15 @@ export async function asyncReduce<
 ): Promise<TAccumulator>;
 
 export async function asyncReduce<
-  TCollection extends CustomAsyncIterable<unknown, unknown>,
-  TAccumulator = TCollection extends CustomAsyncIterable<infer TValue, unknown>
+  TCollection extends AsyncIterable<unknown, unknown>,
+  TAccumulator = TCollection extends AsyncIterable<infer TValue, unknown>
     ? TValue
     : never,
 >(
   asyncIterable: TCollection,
   callback: (
     acc: TAccumulator,
-    item: TCollection extends CustomAsyncIterable<infer TValue, unknown>
+    item: TCollection extends AsyncIterable<infer TValue, unknown>
       ? TValue
       : never,
     index: number,

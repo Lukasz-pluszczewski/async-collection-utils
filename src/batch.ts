@@ -1,5 +1,3 @@
-import { CustomAsyncIterable, CustomIterable } from "./shared";
-
 export function batch<TCollection extends Array<any>>(
   array: TCollection extends Iterator<any> ? never : TCollection,
   batchSize: number,
@@ -10,21 +8,18 @@ export function batch<TCollection extends Set<any>>(
   batchSize: number,
 ): Set<TCollection extends Set<infer TValue> ? TValue[] : never>;
 
-export function batch<
-  TCollection extends CustomIterable<any, any>,
-  TUpdateValue,
->(
+export function batch<TCollection extends Iterable<any, any>, TUpdateValue>(
   iterable: TCollection,
   batchSize: number,
 ): Generator<
-  TCollection extends CustomIterable<infer TValue, any> ? TValue[] : never
+  TCollection extends Iterable<infer TValue, any> ? TValue[] : never
 >;
 
-export function batch<TCollection extends CustomAsyncIterable<any, any>>(
+export function batch<TCollection extends AsyncIterable<any, any>>(
   asyncIterable: TCollection,
   batchSize: number,
 ): AsyncGenerator<
-  TCollection extends CustomAsyncIterable<infer TValue, any> ? TValue[] : never
+  TCollection extends AsyncIterable<infer TValue, any> ? TValue[] : never
 >;
 
 export function batch(iterable: any, batchSize: number): any {

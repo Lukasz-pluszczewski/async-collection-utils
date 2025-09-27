@@ -1,11 +1,4 @@
-import {
-  Break,
-  CustomAsyncIterable,
-  CustomIterable,
-  isPlainObject,
-  LastClass,
-  TypedArray,
-} from "./shared";
+import { Break, isPlainObject, LastClass, TypedArray } from "./shared";
 
 export function flatMapToArray<TCollection extends unknown[], TUpdateValue>(
   array: TCollection,
@@ -63,14 +56,12 @@ export function flatMapToArray<TCollection extends TypedArray>(
 ): TCollection[number][];
 
 export function flatMapToArray<
-  TCollection extends CustomIterable<unknown, unknown>,
+  TCollection extends Iterable<unknown, unknown>,
   TUpdateValue,
 >(
   iterable: TCollection,
   callback: (
-    item: TCollection extends CustomIterable<infer TValue, unknown>
-      ? TValue
-      : never,
+    item: TCollection extends Iterable<infer TValue, unknown> ? TValue : never,
     index: number,
     iterable: TCollection,
   ) =>

@@ -1,10 +1,4 @@
-import {
-  Break,
-  CustomAsyncIterable,
-  CustomIterable,
-  LastClass,
-  TypedArray,
-} from "./shared";
+import { Break, LastClass, TypedArray } from "./shared";
 
 export async function asyncFlatMap<TCollection extends unknown[], TUpdateValue>(
   array: TCollection,
@@ -52,14 +46,12 @@ export async function asyncFlatMap<TCollection extends TypedArray>(
 ): Promise<TCollection>;
 
 export async function asyncFlatMap<
-  TCollection extends CustomIterable<unknown, unknown>,
+  TCollection extends Iterable<unknown, unknown>,
   TUpdateValue,
 >(
   iterable: TCollection,
   callback: (
-    item: TCollection extends CustomIterable<infer TValue, unknown>
-      ? TValue
-      : never,
+    item: TCollection extends Iterable<infer TValue, unknown> ? TValue : never,
     index: number,
     iterable: TCollection,
   ) => Promise<
@@ -71,12 +63,12 @@ export async function asyncFlatMap<
 ): Promise<AsyncGenerator<TUpdateValue>>;
 
 export async function asyncFlatMap<
-  TCollection extends CustomAsyncIterable<unknown, unknown>,
+  TCollection extends AsyncIterable<unknown, unknown>,
   TUpdateValue,
 >(
   asyncIterable: TCollection,
   callback: (
-    item: TCollection extends CustomAsyncIterable<infer TValue, unknown>
+    item: TCollection extends AsyncIterable<infer TValue, unknown>
       ? TValue
       : never,
     index: number,

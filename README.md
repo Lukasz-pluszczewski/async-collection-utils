@@ -27,22 +27,22 @@ Each method (except for "forEach" and all "toArray" utilities) returns the same 
 ## Usage
 ### Basic
 ```javascript
-import { asyncMap, asyncReduce, Break, Last } from 'async-collection-utils';
+import { asyncMap, map, asyncReduce, Break, Last } from 'async-collection-utils';
 
 const data = [1, 2, 3];
-const result = await asyncMap(data, async (item) => item * 2);
+const result = await asyncMap(data, async (item) => Promise.resolve(item * 2));
 // result: [2, 4, 6]
 
 const data = new Set([1, 2, 3]);
-const result = await asyncMap(data, async (item) => item + 1);
+const result = await asyncMap(data, async (item) => Promise.resolve(item + 1));
 // result: Set { 2, 3, 4 }
 
 const data = { a: 1, b: 2, c: 3 };
-const result = await asyncMap(data, async (value, key) => value + key);
+const result = map(data, async (value, key) => value + key);
 // result: { a: '1a', b: '2b', c: '3c' }
 
 const cursor = model.find({}).cursor();
-const result = await asyncReduce(cursor, async (acc, item) => acc + item.value, 0);
+const result = await asyncReduce(cursor, async (acc, item) => Promise.resolve(acc + item.value), 0);
 // result: number
 ```
 
@@ -77,6 +77,101 @@ Each type of utility has both async and sync versions. These return the same typ
 | asyncForEach<TInput, void>            | void              | void              | void               | void                  | void                   | void                       | void                       |
 | forEach<TInput, void>                 | void              | void              | void               | void                  | void                   | void                       | ❌                          |
 
+### Usage with iterables
+All functions accept iterables ()
+
+### Map functions
+#### map
+```javascript
+import { map } from 'async-collection-utils';
+
+const results = map([1, 2, 3], (item) => item * 2);
+// results: [2, 4, 6]
+
+const results = map(new Set([1, 2, 3]), (item) => item * 2);
+// results: Set { 2, 4, 6 }
+
+const results = map({ a: 1, b: 2, c: 3 }, (value, key) => value + key);
+// results: { a: '1a', b: '2b', c: '3c' }
+
+const results = map(new Map([['a', 1], ['b', 2], ['c', 3]]), (value, key) => value + key);
+// results: Map { a: '1a', b: '2b', c: '3c' }
+
+const results = map(model.find({}).cursor(), (item) => parseInt(item.value));
+// results: Generator<number>
+
+const generator = function* () {
+  yield 1;
+  yield 2;
+  yield 3;
+};
+const results = map(generator(), async (item) => item * 2);
+// results: Generator<number>
+```
+
+#### asyncMap
+```javascript
+import { asyncMap } from 'async-collection-utils';
+
+const results = await asyncMap([1, 2, 3], async (item) => Promise.resolve(item * 2));
+// results: [2, 4, 6]
+
+const results = await asyncMap(new Set([1, 2, 3]), async (item) => Promise.resolve(item * 2));
+// results: Set { 2, 4, 6 }
+
+const results = await asyncMap({ a: 1, b: 2, c: 3 }, async (value, key) => Promise.resolve(value + key));
+// results: { a: '1a', b: '2b', c: '3c' }
+
+const results = await asyncMap(new Map([['a', 1], ['b', 2], ['c', 3]]), async (value, key) => Promise.resolve(value + key));
+// results: Map { a: '1a', b: '2b', c: '3c' }
+
+const results = await asyncMap(model.find({}).cursor(), async (item) => Promise.resolve(parseInt(item.value)));
+// results: AsyncGenerator<number>
+
+const asyncGenerator = function* () {
+  yield 1;
+  yield 2;
+  yield 3;
+};
+const results = await asyncMap(generator(), async (item) => Promise.resolve(item * 2));
+// results: AsyncGenerator<number>
+
+const generator = function* () {
+  yield 1;
+  yield 2;
+  yield 3;
+};
+const results = await asyncMap(generator(), async (item) => Promise.resolve(item * 2));
+// results: AsyncGenerator<number>
+```
+
+#### mapToArray
+```javascript
+import { mapToArray } from 'async-collection-utils';
+
+const results = mapToArray([1, 2, 3], (item) => item * 2);
+// results: [2, 4, 6]
+
+const results = mapToArray(new Set([1, 2, 3]), (item) => item * 2);
+// results: [2, 4, 6]
+
+const results = mapToArray({ a: 1, b: 2, c: 3 }, (value, key) => value + key);
+// results: ['1a', '2b', '3c']
+
+const results = mapToArray(new Map([['a', 1], ['b', 2], ['c', 3]]), (value, key) => value + key);
+// results: ['1a', '2b', '3c']
+
+const results = mapToArray(model.find({}).cursor(), (item) => parseInt(item.value));
+// results: number[]
+
+const generator = function* () {
+  yield 1;
+  yield 2;
+  yield 3;
+};
+const results = mapToArray(generator(), async (item) => item * 2);
+// results: [2, 4, 6]
+```
 
 ### Using Break and Last
 You can use `Break` to finish the iteration early in all functions.
@@ -99,7 +194,7 @@ const result = await asyncMap(data, async (value) => {
 // result: { a: 2, b: 4 }
 ```
 
-You can use `Last` wrapper, to finish the iteration early while still returning last value. It works in all `map`, `reduce` and `filter` functions.
+You can use `Last` wrapper, to finish the iteration early while still returning last value. It works in all `map`, `flatMap`, `reduce` and `filter` functions.
 
 ```javascript
 const data = [1, 2, 3, 4, 5];
@@ -147,6 +242,20 @@ Two helpers used internally are exported as well:
     const result: SomeEnum[] = await keys(obj);
     // result: [SomeEnum.foo, SomeEnum.bar]
     ```
+
+## Array-like objects
+Methods are not generic meaning that they won't treat array-like objects as arrays. They will be iterated over just like plain objects.
+
+```javascript
+import { map } from 'async-collection-utils';
+
+const obj = { 0: 'a', 1: 'b', length: 2 };
+const result = map(obj, (value, key) => value + key);
+// result: { 0: 'a0', 1: 'b1', length: '2length' }
+```
+
+## Notes
+- Remember to always pass async iteratee to async functions; otherwise, type inference will fail
 
 ## Changelog
 

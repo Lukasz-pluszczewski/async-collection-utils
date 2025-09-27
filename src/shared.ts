@@ -26,13 +26,6 @@ export type TypedArray =
   | BigInt64Array
   | BigUint64Array;
 
-export type CustomAsyncIterable<TValue, TReturn> = {
-  next: () => Promise<IteratorResult<TValue, TReturn>>;
-};
-export type CustomIterable<TValue, TReturn> = {
-  next: () => IteratorResult<TValue, TReturn>;
-};
-
 export const Last = <T>(value: T) => new LastClass(value);
 
 // --- helpers ---

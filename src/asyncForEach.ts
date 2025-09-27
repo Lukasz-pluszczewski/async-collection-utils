@@ -1,10 +1,4 @@
-import {
-  Break,
-  CustomAsyncIterable,
-  CustomIterable,
-  isPlainObject,
-  TypedArray,
-} from "./shared";
+import { Break, isPlainObject, TypedArray } from "./shared";
 
 export async function asyncForEach<TCollection extends unknown[]>(
   array: TCollection,
@@ -43,24 +37,22 @@ export async function asyncForEach<TCollection extends TypedArray>(
 ): Promise<void>;
 
 export async function asyncForEach<
-  TCollection extends CustomIterable<unknown, unknown>,
+  TCollection extends Iterable<unknown, unknown>,
 >(
   iterable: TCollection,
   callback: (
-    item: TCollection extends CustomIterable<infer TValue, unknown>
-      ? TValue
-      : never,
+    item: TCollection extends Iterable<infer TValue, unknown> ? TValue : never,
     index: number,
     iterable: TCollection,
   ) => Promise<void | typeof Break>,
 ): Promise<void>;
 
 export async function asyncForEach<
-  TCollection extends CustomAsyncIterable<unknown, unknown>,
+  TCollection extends AsyncIterable<unknown, unknown>,
 >(
   asyncIterable: TCollection,
   callback: (
-    item: TCollection extends CustomAsyncIterable<infer TValue, unknown>
+    item: TCollection extends AsyncIterable<infer TValue, unknown>
       ? TValue
       : never,
     index: number,

@@ -1,11 +1,4 @@
-import {
-  Break,
-  CustomAsyncIterable,
-  CustomIterable,
-  isPlainObject,
-  LastClass,
-  TypedArray,
-} from "./shared";
+import { Break, isPlainObject, LastClass, TypedArray } from "./shared";
 
 export async function asyncFilterToArray<TCollection extends unknown[]>(
   array: TCollection,
@@ -46,35 +39,31 @@ export async function asyncFilterToArray<TCollection extends TypedArray>(
 ): Promise<TCollection[number][]>;
 
 export async function asyncFilterToArray<
-  TCollection extends CustomIterable<unknown, unknown>,
+  TCollection extends Iterable<unknown, unknown>,
 >(
   iterable: TCollection,
   predicate: (
-    item: TCollection extends CustomIterable<infer TValue, unknown>
-      ? TValue
-      : never,
+    item: TCollection extends Iterable<infer TValue, unknown> ? TValue : never,
     index: number,
     iterable: TCollection,
   ) => Promise<boolean | typeof Break | LastClass<boolean>>,
 ): Promise<
-  TCollection extends CustomIterable<infer TValue, unknown> ? TValue[] : never
+  TCollection extends Iterable<infer TValue, unknown> ? TValue[] : never
 >;
 
 export async function asyncFilterToArray<
-  TCollection extends CustomAsyncIterable<unknown, unknown>,
+  TCollection extends AsyncIterable<unknown, unknown>,
 >(
   asyncIterable: TCollection,
   predicate: (
-    item: TCollection extends CustomAsyncIterable<infer TValue, unknown>
+    item: TCollection extends AsyncIterable<infer TValue, unknown>
       ? TValue
       : never,
     index: number,
     iterable: TCollection,
   ) => Promise<boolean | typeof Break | LastClass<boolean>>,
 ): Promise<
-  TCollection extends CustomAsyncIterable<infer TValue, unknown>
-    ? TValue[]
-    : never
+  TCollection extends AsyncIterable<infer TValue, unknown> ? TValue[] : never
 >;
 
 export async function asyncFilterToArray<

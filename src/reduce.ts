@@ -1,10 +1,4 @@
-import {
-  Break,
-  CustomIterable,
-  isPlainObject,
-  LastClass,
-  TypedArray,
-} from "./shared";
+import { Break, isPlainObject, LastClass, TypedArray } from "./shared";
 
 export function reduce<
   TCollection extends unknown[],
@@ -65,17 +59,15 @@ export function reduce<
 ): TAccumulator;
 
 export function reduce<
-  TCollection extends CustomIterable<unknown, unknown>,
-  TAccumulator = TCollection extends CustomIterable<infer TValue, unknown>
+  TCollection extends Iterable<unknown, unknown>,
+  TAccumulator = TCollection extends Iterable<infer TValue, unknown>
     ? TValue
     : never,
 >(
   iterable: TCollection,
   callback: (
     acc: TAccumulator,
-    item: TCollection extends CustomIterable<infer TValue, unknown>
-      ? TValue
-      : never,
+    item: TCollection extends Iterable<infer TValue, unknown> ? TValue : never,
     index: number,
     iterable: TCollection,
   ) => TAccumulator | typeof Break | LastClass<TAccumulator>,

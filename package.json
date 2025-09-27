@@ -1,11 +1,12 @@
 {
   "name": "async-collection-utils",
-  "version": "2.0.0",
+  "version": "2.0.0-rc.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsup-node src/index.ts --dts",
     "test": "vitest --globals --typecheck --coverage src/*.test.ts",
+    "test-single": "vitest --globals --typecheck",
     "generateToc": "markdown-toc --bullets=\"*\" --no-firsth1 README.md"
   },
   "repository": {
@@ -26,19 +27,20 @@
     "entries",
     "keys",
     "object",
-    "array"
+    "array",
+    "iterables",
+    "generator",
+    "stream"
   ],
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^22.15.23",
     "@vitest/coverage-v8": "3.1.4",
+    "benchmarkify": "^4.0.0",
     "markdown-toc": "^1.2.0",
     "prettier": "^3.5.3",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3",
     "vitest": "^3.1.4"
-  },
-  "dependencies": {
-    "benchmarkify": "^4.0.0"
   }
 }

@@ -1,10 +1,4 @@
-import {
-  Break,
-  CustomIterable,
-  isPlainObject,
-  LastClass,
-  TypedArray,
-} from "./shared";
+import { Break, isPlainObject, LastClass, TypedArray } from "./shared";
 
 export function filter<TCollection extends unknown[]>(
   array: TCollection,
@@ -45,17 +39,15 @@ export function filter<TCollection extends TypedArray>(
   ) => boolean | typeof Break | LastClass<boolean>,
 ): TCollection;
 
-export function filter<TCollection extends CustomIterable<unknown, unknown>>(
+export function filter<TCollection extends Iterable<unknown, unknown>>(
   iterable: TCollection,
   predicate: (
-    item: TCollection extends CustomIterable<infer TValue, unknown>
-      ? TValue
-      : never,
+    item: TCollection extends Iterable<infer TValue, unknown> ? TValue : never,
     index: number,
     iterable: TCollection,
   ) => boolean | typeof Break | LastClass<boolean>,
 ): Generator<
-  TCollection extends CustomIterable<infer TValue, unknown> ? TValue : never
+  TCollection extends Iterable<infer TValue, unknown> ? TValue : never
 >;
 
 export function filter<
