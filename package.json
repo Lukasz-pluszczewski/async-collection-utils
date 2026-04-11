@@ -3,10 +3,17 @@
   "version": "2.0.0-rc.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsup-node src/index.ts --dts",
-    "test": "vitest --globals --typecheck --coverage src/*.test.ts",
-    "test-single": "vitest --globals --typecheck",
+    "test": "npm run test:runtime && npm run test:types",
+    "test:runtime": "vitest --globals --coverage src/*.test.ts",
+    "test:types": "vitest --globals --typecheck src/*.test-d.ts",
+    "pack:check": "npm pack --dry-run --cache /tmp/npm-cache",
     "generateToc": "markdown-toc --bullets=\"*\" --no-firsth1 README.md"
   },
   "repository": {

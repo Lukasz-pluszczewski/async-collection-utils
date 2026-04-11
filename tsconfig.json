@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "DOM"],
     "esModuleInterop": true,
     "noErrorTruncation": true,
     "module": "NodeNext",

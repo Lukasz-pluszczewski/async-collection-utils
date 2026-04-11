@@ -46,12 +46,12 @@ export function filterToArray<TCollection extends Iterable<unknown, unknown>>(
 ): TCollection extends Iterable<infer TValue, unknown> ? TValue[] : never;
 
 export function filterToArray<
-  TCollection extends Record<string | number | symbol, unknown>,
+  TCollection extends Record<string, unknown>,
 >(
   obj: TCollection,
   predicate: (
     value: TCollection[keyof TCollection],
-    key: keyof TCollection & string,
+    key: Extract<keyof TCollection, string>,
     object: TCollection,
   ) => boolean | typeof Break | LastClass<boolean>,
 ): TCollection[keyof TCollection][];

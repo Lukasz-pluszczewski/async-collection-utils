@@ -102,13 +102,13 @@ export async function asyncFlatMapToArray<
 ): Promise<TUpdateValue[]>;
 
 export async function asyncFlatMapToArray<
-  TCollection extends Record<string | number | symbol, unknown>,
+  TCollection extends Record<string, unknown>,
   TUpdateValue,
 >(
   obj: TCollection,
   callback: (
     value: TCollection[keyof TCollection],
-    key: keyof TCollection & string,
+    key: Extract<keyof TCollection, string>,
     object: TCollection,
   ) => Promise<
     | TUpdateValue

@@ -1,28 +1,18 @@
-import { reduce } from "./reduce";
-import { Break, Last } from "./shared";
 import { describe, expectTypeOf, it } from "vitest";
-import mongoose from "mongoose";
 import { asyncMap } from "./asyncMap";
 import { asyncMapToArray } from "./asyncMapToArray";
-import fs from "node:fs";
 import { asyncFilter } from "./asyncFilter";
 import { asyncReduce } from "./asyncReduce";
 import { asyncFlatMap } from "./asyncFlatMap";
 
-const mongooseSchema = new mongoose.Schema({
-  name: String,
-  value: Number,
-});
-const mongooseModel = mongoose.model("test", mongooseSchema);
-
 describe("iterables", () => {
-  it.skip("WTF?", () => {
-    const cursor = mongooseModel.find().cursor();
-    // @ts-expect-error TS2322, what is going on here?
-    asyncMap(cursor, async (value) => value);
-  });
-  it("MongoDB Cursor", async () => {
-    const cursor = mongooseModel.find().cursor();
+  it("supports cursor-like async iterables", async () => {
+    type CursorValue = { value: number; label: string };
+    type Cursor<TValue> = AsyncIterable<TValue> & {
+      close: () => Promise<void>;
+    };
+
+    const cursor = {} as Cursor<CursorValue>;
 
     const one = await asyncMap(cursor, async (value) => value.value);
     const two = await asyncFilter(one, async (value) => value > 2);
@@ -40,12 +30,21 @@ describe("iterables", () => {
       },
       "",
     );
-    expectTypeOf(one).toEqualTypeOf<AsyncGenerator<number, any, any>>();
-    expectTypeOf(two).toEqualTypeOf<AsyncGenerator<number, any, any>>();
-    expectTypeOf(three).toEqualTypeOf<
-      AsyncGenerator<string | number, any, any>
-    >();
+
+    expectTypeOf(one).toMatchTypeOf<AsyncIterable<number>>();
+    expectTypeOf(two).toMatchTypeOf<AsyncIterable<number>>();
+    expectTypeOf(three).toMatchTypeOf<AsyncIterable<string | number>>();
     expectTypeOf(four).toEqualTypeOf<string>();
   });
-  it("");
+
+  it("supports line-stream-like async iterables with toArray APIs", async () => {
+    type LineStream = AsyncIterable<string> & {
+      close: () => void;
+    };
+
+    const lineStream = {} as LineStream;
+    const lines = await asyncMapToArray(lineStream, async (line) => line.trim());
+
+    expectTypeOf(lines).toEqualTypeOf<string[]>();
+  });
 });

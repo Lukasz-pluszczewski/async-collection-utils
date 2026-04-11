@@ -1,4 +1,4 @@
-export type ObjectKey = string | number | symbol;
+export type ObjectKey = string | number;
 export type StringifiedObjectKey<TKey extends ObjectKey> = TKey extends string
   ? TKey
   : string;
@@ -34,7 +34,7 @@ export const entries = <TValue, TKey extends ObjectKey>(
 ): ObjectEntry<TKey, TValue>[] => {
   const result: [StringifiedObjectKey<TKey>, TValue][] = [];
   for (const key in object) {
-    if (object.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(object, key)) {
       result.push([key, object[key]!]);
     }
   }
@@ -45,14 +45,17 @@ export const keys = <TValue, TKey extends ObjectKey>(
 ): StringifiedObjectKey<TKey>[] => {
   const result: StringifiedObjectKey<TKey>[] = [];
   for (const key in object) {
-    if (object.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(object, key)) {
       result.push(key);
     }
   }
   return result;
 };
 
-export const isPlainObject = (v) =>
-  !!v &&
-  typeof v === "object" &&
-  (v.__proto__ === null || v.__proto__ === Object.prototype);
+export const isPlainObject = (v: unknown): v is Record<string, unknown> => {
+  if (!v || typeof v !== "object") {
+    return false;
+  }
+  const prototype = Object.getPrototypeOf(v);
+  return prototype === null || prototype === Object.prototype;
+};

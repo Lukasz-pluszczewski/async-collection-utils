@@ -61,12 +61,12 @@ export async function asyncForEach<
 ): Promise<void>;
 
 export async function asyncForEach<
-  TCollection extends Record<string | number | symbol, unknown>,
+  TCollection extends Record<string, unknown>,
 >(
   obj: TCollection,
   callback: (
     value: TCollection[keyof TCollection],
-    key: keyof TCollection & string,
+    key: Extract<keyof TCollection, string>,
     object: TCollection,
   ) => Promise<void | typeof Break>,
 ): Promise<void>;

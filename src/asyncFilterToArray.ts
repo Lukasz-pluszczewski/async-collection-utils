@@ -67,12 +67,12 @@ export async function asyncFilterToArray<
 >;
 
 export async function asyncFilterToArray<
-  TCollection extends Record<string | number | symbol, unknown>,
+  TCollection extends Record<string, unknown>,
 >(
   obj: TCollection,
   predicate: (
     value: TCollection[keyof TCollection],
-    key: keyof TCollection & string,
+    key: Extract<keyof TCollection, string>,
     object: TCollection,
   ) => Promise<boolean | typeof Break | LastClass<boolean>>,
 ): Promise<TCollection[keyof TCollection][]>;

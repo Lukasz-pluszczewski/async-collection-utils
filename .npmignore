@@ -1,33 +1,7 @@
-# dependencies
+# Package publishing is primarily controlled by package.json "files".
+# Keep a minimal ignore list as a fallback.
 /node_modules
-
-# testing
 /coverage
-
-# docs
-/docs
-
-# misc
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-/.github
-/demo
-.esdoc.json
-.idea
-bun.lock
-
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Development folders and files
-public
-src
-scripts
-config
-.travis.yml
-CHANGELOG.md
-logo.png
+/.idea
+/.aider*
+/CLAUDE.md

@@ -93,14 +93,14 @@ export async function asyncReduce<
 ): Promise<TAccumulator>;
 
 export async function asyncReduce<
-  TCollection extends Record<string | number | symbol, unknown>,
+  TCollection extends Record<string, unknown>,
   TAccumulator = TCollection[keyof TCollection],
 >(
   obj: TCollection,
   callback: (
     acc: TAccumulator,
     value: TCollection[keyof TCollection],
-    key: keyof TCollection & string,
+    key: Extract<keyof TCollection, string>,
     object: TCollection,
   ) => Promise<TAccumulator | typeof Break | LastClass<TAccumulator>>,
   initialValue?: TAccumulator,

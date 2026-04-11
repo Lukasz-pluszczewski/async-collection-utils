@@ -196,6 +196,18 @@ describe("map", () => {
         "2": 20,
       });
     });
+
+    it("should map null-prototype objects", () => {
+      const obj = Object.create(null) as Record<string, number>;
+      obj["1"] = 1;
+      obj["2"] = 2;
+
+      const result = map(obj, (value) => value * 2);
+      expect(result).toStrictEqual({
+        "1": 2,
+        "2": 4,
+      });
+    });
   });
 
   describe("iterator", () => {

@@ -52,13 +52,13 @@ export function mapToArray<
 ): TUpdateValue[];
 
 export function mapToArray<
-  TCollection extends Record<string | number | symbol, unknown>,
+  TCollection extends Record<string, unknown>,
   TUpdateValue,
 >(
   obj: TCollection,
   callback: (
     value: TCollection[keyof TCollection],
-    key: keyof TCollection & string,
+    key: Extract<keyof TCollection, string>,
     object: TCollection,
   ) => TUpdateValue | typeof Break | LastClass<TUpdateValue>,
 ): TUpdateValue[];

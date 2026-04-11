@@ -46,12 +46,12 @@ export function forEach<TCollection extends Iterable<unknown, unknown>>(
 ): void;
 
 export function forEach<
-  TCollection extends Record<string | number | symbol, unknown>,
+  TCollection extends Record<string, unknown>,
 >(
   obj: TCollection,
   callback: (
     value: TCollection[keyof TCollection],
-    key: keyof TCollection & string,
+    key: Extract<keyof TCollection, string>,
     object: TCollection,
   ) => void | typeof Break,
 ): void;

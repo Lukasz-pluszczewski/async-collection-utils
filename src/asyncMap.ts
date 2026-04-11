@@ -70,13 +70,13 @@ export async function asyncMap<
 ): Promise<AsyncGenerator<TUpdateValue>>;
 
 export async function asyncMap<
-  TCollection extends Record<string | number | symbol, unknown>,
+  TCollection extends Record<string, unknown>,
   TUpdateValue,
 >(
   obj: TCollection,
   callback: (
     value: TCollection[keyof TCollection],
-    key: keyof TCollection & string,
+    key: Extract<keyof TCollection, string>,
     object: TCollection,
   ) => Promise<TUpdateValue | typeof Break | LastClass<TUpdateValue>>,
 ): Promise<{ [K in keyof TCollection]: TUpdateValue }>;

@@ -54,7 +54,7 @@ var Last = (value) => new LastClass(value);
 var entries = (object) => {
   const result = [];
   for (const key in object) {
-    if (object.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(object, key)) {
       result.push([key, object[key]]);
     }
   }
@@ -63,13 +63,19 @@ var entries = (object) => {
 var keys = (object) => {
   const result = [];
   for (const key in object) {
-    if (object.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(object, key)) {
       result.push(key);
     }
   }
   return result;
 };
-var isPlainObject = (v) => !!v && typeof v === "object" && (v.__proto__ === null || v.__proto__ === Object.prototype);
+var isPlainObject = (v) => {
+  if (!v || typeof v !== "object") {
+    return false;
+  }
+  const prototype = Object.getPrototypeOf(v);
+  return prototype === null || prototype === Object.prototype;
+};
 
 // src/asyncMap.ts
 async function asyncMap(iterable, callback) {
