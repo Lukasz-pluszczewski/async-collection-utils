@@ -2,19 +2,6 @@
 
 A well tested and typed collection of map, forEach, reduce, filter etc. utility functions supporting arrays, sets, maps, plain objects, iterators in both async and synchronous versions.
 
-* [Core Concepts](#core-concepts)
-* [Usage](#usage)
-  * [Import](#import)
-  * [Array Utilities](#array-utilities)
-    * [Sequential](#sequential)
-    * [Parallel](#parallel)
-  * [Object Utilities](#object-utilities)
-    * [Sequential](#sequential-1)
-    * [Parallel](#parallel-1)
-  * [Using Break and Last](#using-break-and-last)
-  * [Synchronous](#synchronous)
-  * [Helpers](#helpers)
-* [Changelog](#changelog)
 
 ## Core Concepts
 Each method (except for "forEach" and all "toArray" utilities) returns the same type as the input: asyncMap(new Map(), () => {}) returns Promise<Map> etc.
@@ -56,26 +43,28 @@ Each type of utility has both async and sync versions. These return the same typ
 | toArray async |  ✅  |    ✅    |   ✅    |  n/a   |   n/a   |
 | toArray sync  |  ✅  |    ✅    |   ✅    |  n/a   |   n/a   |
 
-### Input/output support map
+### API Matrix
 
-|                                       | Array<T>          | Set<T>            | Map<K, T>          | Record<K, T>          | TypedArray<T>          | Iterable<T>                | AsyncIterable<T>           |
-|---------------------------------------|-------------------|-------------------|--------------------|-----------------------|------------------------|----------------------------|----------------------------|
-| asyncMap<TInput, R>                   | Promise<Array<R>> | Promise<Set<R>>   | Promise<Map<K, R>> | Promise<Record<K, R>> | Promise<TypedArray<R>> | Promise<AsyncGenerator<R>> | Promise<AsyncGenerator<R>> |
-| map<TInput, R>                        | Array<R>          | Set<R>            | Map<K, R>          | Record<K, R>          | TypedArray<R>          | Generator<R>               | ❌                          |
-| asyncMapToArray<TInput, R>            | Promise<Array<R>> | Promise<Array<R>> | Promise<Array<R>>  | Promise<Array<R>>     | Promise<Array<R>>      | Promise<Array<R>>          | Promise<Array<R>>          |
-| mapToArray<TInput, R>                 | Array<R>          | Array<R>          | Array<R>           | Array<R>              | Array<R>               | Array<R>                   | ❌                          |
-| asyncFlatMap<TInput, R \| R[]>        | Promise<Array<R>> | Promise<Set<R>>   | ❌                  | ❌                     | Promise<TypedArray<R>> | Promise<AsyncGenerator<R>> | Promise<AsyncGenerator<R>> |
-| flatMap<TInput, R \| R[]>             | Array<R>          | Set<R>            | ❌                  | ❌                     | TypedArray<R>          | Generator<R>               | ❌                          |
-| asyncFlatMapToArray<TInput, R \| R[]> | Promise<Array<R>> | Promise<Array<R>> | Promise<Array<R>>  | Promise<Array<R>>     | Promise<Array<R>>      | Promise<Array<R>>          | Promise<Array<R>>          |
-| flatMapToArray<TInput, R \| R[]>      | Array<R>          | Array<R>          | Array<R>           | Array<R>              | Array<R>               | Array<R>                   | ❌                          |
-| asyncFilter<TInput, boolean>          | Promise<Array<R>> | Promise<Set<R>>   | Promise<Map<K, R>> | Promise<Record<K, R>> | Promise<TypedArray<R>> | Promise<AsyncGenerator<R>> | Promise<AsyncGenerator<R>> |   
-| filter<TInput, boolean>               | Array<R>          | Set<R>            | Map<K, R>          | Record<K, R>          | TypedArray<R>          | Generator<R>               | ❌                          |  
-| asyncFilterToArray<TInput, boolean>   | Promise<Array<R>> | Promise<Array<R>> | Promise<Array<R>>  | Promise<Array<R>>     | Promise<Array<R>>      | Promise<Array<R>>          | Promise<Array<R>>          |   
-| filterToArray<TInput, boolean>        | Array<R>          | Array<R>          | Array<R>           | Array<R>              | Array<R>               | Array<R>                   | ❌                          |  
-| asyncReduce<TInput, R>                | Promise<R>        | Promise<R>        | Promise<R>         | Promise<R>            | Promise<R>             | Promise<R>                 | Promise<R>                 |
-| reduce<TInput, R>                     | R                 | R                 | R                  | R                     | R                      | R                          | ❌                          |
-| asyncForEach<TInput, void>            | void              | void              | void               | void                  | void                   | void                       | void                       |
-| forEach<TInput, void>                 | void              | void              | void               | void                  | void                   | void                       | ❌                          |
+| Utility               | Array | Set | Map | TypedArray | Plain Object | Iterable | AsyncIterable |
+|-----------------------|:-----:|:---:|:---:|:----------:|:------------:|:--------:|:-------------:|
+| `map`                 |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ❌            |
+| `asyncMap`            |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ✅            |
+| `mapToArray`          |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ❌            |
+| `asyncMapToArray`     |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ✅            |
+| `flatMap`             |  ✅   | ✅  | ❌  | ✅         | ❌           | ✅       | ❌            |
+| `asyncFlatMap`        |  ✅   | ✅  | ❌  | ✅         | ❌           | ✅       | ✅            |
+| `flatMapToArray`      |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ❌            |
+| `asyncFlatMapToArray` |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ✅            |
+| `filter`              |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ❌            |
+| `asyncFilter`         |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ✅            |
+| `filterToArray`       |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ❌            |
+| `asyncFilterToArray`  |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ✅            |
+| `reduce`              |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ❌            |
+| `asyncReduce`         |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ✅            |
+| `forEach`             |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ❌            |
+| `asyncForEach`        |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ✅            |
+| `batch`               |  ✅   | ✅  | ❌  | ❌         | ❌           | ✅       | ✅            |
+
 
 ### Usage with iterables
 All functions accept iterables ()
