@@ -1,5 +1,14 @@
 import { Break, isPlainObject, LastClass, TypedArray } from "./shared";
 
+export async function asyncFilterToArray(
+  iterable: true,
+  predicate: (
+    item: number,
+    index: number,
+    iterable: true,
+  ) => Promise<boolean | typeof Break | LastClass<boolean>>,
+): Promise<number[]>;
+
 export async function asyncFilterToArray<TCollection extends unknown[]>(
   array: TCollection,
   predicate: (
@@ -81,6 +90,24 @@ export async function asyncFilterToArray(
   iterable: unknown,
   predicate: (...args: any[]) => Promise<unknown>,
 ): Promise<unknown> {
+  if (iterable === true) {
+    const result: number[] = [];
+    for (let i = 0; ; i++) {
+      const decision = await predicate(i, i, true);
+      if (decision === Break) break;
+      if (decision instanceof LastClass) {
+        if (decision.value) {
+          result.push(i);
+        }
+        break;
+      }
+      if (decision) {
+        result.push(i);
+      }
+    }
+    return result;
+  }
+
   if (Array.isArray(iterable)) {
     const result: unknown[] = [];
     for (let i = 0; i < iterable.length; i++) {

@@ -1,5 +1,14 @@
 import { Break, isPlainObject, LastClass, TypedArray } from "./shared";
 
+export function filterToArray(
+  iterable: true,
+  predicate: (
+    item: number,
+    index: number,
+    iterable: true,
+  ) => boolean | typeof Break | LastClass<boolean>,
+): number[];
+
 export function filterToArray<TCollection extends unknown[]>(
   array: TCollection,
   predicate: (
@@ -60,6 +69,24 @@ export function filterToArray(
   iterable: unknown,
   predicate: (...args: any[]) => unknown,
 ): unknown {
+  if (iterable === true) {
+    const result: number[] = [];
+    for (let i = 0; ; i++) {
+      const decision = predicate(i, i, true);
+      if (decision === Break) break;
+      if (decision instanceof LastClass) {
+        if (decision.value) {
+          result.push(i);
+        }
+        break;
+      }
+      if (decision) {
+        result.push(i);
+      }
+    }
+    return result;
+  }
+
   if (Array.isArray(iterable)) {
     const result: unknown[] = [];
     for (let i = 0; i < iterable.length; i++) {

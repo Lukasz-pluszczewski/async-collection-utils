@@ -1,7 +1,0 @@
-# Package publishing is primarily controlled by package.json "files".
-# Keep a minimal ignore list as a fallback.
-/node_modules
-/coverage
-/.idea
-/.aider*
-/CLAUDE.md

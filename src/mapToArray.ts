@@ -1,5 +1,14 @@
 import { Break, isPlainObject, LastClass, TypedArray } from "./shared";
 
+export function mapToArray<TUpdateValue>(
+  iterable: true,
+  callback: (
+    item: number,
+    index: number,
+    iterable: true,
+  ) => TUpdateValue | typeof Break | LastClass<TUpdateValue>,
+): TUpdateValue[];
+
 export function mapToArray<TCollection extends unknown[], TUpdateValue>(
   array: TCollection,
   callback: (
@@ -67,6 +76,20 @@ export function mapToArray(
   iterable: unknown,
   callback: (...args: any[]) => unknown,
 ): unknown[] {
+  if (iterable === true) {
+    const result = [];
+    for (let i = 0; ; i++) {
+      const mapped = callback(i, i, true);
+      if (mapped === Break) break;
+      if (mapped instanceof LastClass) {
+        result.push(mapped.value);
+        break;
+      }
+      result.push(mapped);
+    }
+    return result;
+  }
+
   if (Array.isArray(iterable)) {
     const result = [];
     for (let i = 0; i < iterable.length; i++) {

@@ -1,5 +1,14 @@
 import { Break, isPlainObject, TypedArray } from "./shared";
 
+export async function asyncForEach(
+  iterable: true,
+  callback: (
+    item: number,
+    index: number,
+    iterable: true,
+  ) => Promise<void | typeof Break>,
+): Promise<void>;
+
 export async function asyncForEach<TCollection extends unknown[]>(
   array: TCollection,
   callback: (
@@ -75,6 +84,13 @@ export async function asyncForEach(
   iterable: unknown,
   callback: (...args: any[]) => Promise<void | typeof Break>,
 ): Promise<void> {
+  if (iterable === true) {
+    for (let i = 0; ; i++) {
+      if ((await callback(i, i, true)) === Break) break;
+    }
+    return;
+  }
+
   if (Array.isArray(iterable)) {
     for (let i = 0; i < iterable.length; i++) {
       if ((await callback(iterable[i], i, iterable)) === Break) break;

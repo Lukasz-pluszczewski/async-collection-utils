@@ -1,5 +1,19 @@
 import { Break, isPlainObject, LastClass, TypedArray } from "./shared";
 
+export async function asyncFlatMapToArray<TUpdateValue>(
+  iterable: true,
+  callback: (
+    item: number,
+    index: number,
+    iterable: true,
+  ) => Promise<
+    | TUpdateValue
+    | TUpdateValue[]
+    | typeof Break
+    | LastClass<TUpdateValue | TUpdateValue[]>
+  >,
+): Promise<TUpdateValue[]>;
+
 export async function asyncFlatMapToArray<
   TCollection extends unknown[],
   TUpdateValue,
@@ -122,6 +136,29 @@ export async function asyncFlatMapToArray(
   iterable: unknown,
   callback: (...args: any[]) => Promise<unknown>,
 ): Promise<unknown[]> {
+  if (iterable === true) {
+    const result = [];
+    for (let i = 0; ; i++) {
+      const mapped = await callback(i, i, true);
+      if (mapped === Break) break;
+      if (mapped instanceof LastClass) {
+        if (Array.isArray(mapped.value)) {
+          result.push(...mapped.value);
+          break;
+        }
+        result.push(mapped.value);
+        break;
+      }
+
+      if (Array.isArray(mapped)) {
+        result.push(...mapped);
+        continue;
+      }
+      result.push(mapped);
+    }
+    return result;
+  }
+
   if (Array.isArray(iterable)) {
     const result = [];
     for (let i = 0; i < iterable.length; i++) {

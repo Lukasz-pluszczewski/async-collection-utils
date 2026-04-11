@@ -74,4 +74,9 @@ describe("batch", () => {
     expect(results).toStrictEqual([["1", "2"], ["3", "4"], ["5"]]);
     expect(probe).toBeCalledTimes(1);
   });
+  it("throws error for incorrect batch size", () => {
+    expect(() => batch([1, 2, 3], 0)).toThrowError(
+      "Batch size cannot be smaller than 1",
+    );
+  });
 });

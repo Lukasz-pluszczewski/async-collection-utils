@@ -15,7 +15,7 @@ describe("asyncForEach", () => {
     });
 
     it("should break on encountering Break", async () => {
-      const cb = vi.fn(async (value): Promise<typeof Break> => {
+      const cb = vi.fn(async (value): Promise<typeof Break | void> => {
         if (value === 2) return Break;
         return;
       });
@@ -42,7 +42,7 @@ describe("asyncForEach", () => {
     });
 
     it("should break on encountering Break", async () => {
-      const cb = vi.fn(async (value): Promise<typeof Break> => {
+      const cb = vi.fn(async (value): Promise<typeof Break | void> => {
         if (value === 2) return Break;
         return;
       });
@@ -100,7 +100,7 @@ describe("asyncForEach", () => {
     });
 
     it("should break on encountering Break", async () => {
-      const cb = vi.fn(async (value): Promise<typeof Break> => {
+      const cb = vi.fn(async (value): Promise<typeof Break | void> => {
         if (value === 2) return Break;
         return;
       });
@@ -152,7 +152,7 @@ describe("asyncForEach", () => {
     });
 
     it("should break on encountering Break", async () => {
-      const cb = vi.fn(async (value): Promise<typeof Break> => {
+      const cb = vi.fn(async (value): Promise<typeof Break | void> => {
         if (value === 2) return Break;
         return;
       });
@@ -215,7 +215,7 @@ describe("asyncForEach", () => {
     });
 
     it("should break on encountering Break", async () => {
-      const cb = vi.fn(async (value): Promise<typeof Break> => {
+      const cb = vi.fn(async (value): Promise<typeof Break | void> => {
         if (value === 2) return Break;
         return;
       });
@@ -267,7 +267,7 @@ describe("asyncForEach", () => {
     });
 
     it("should break on encountering Break", async () => {
-      const cb = vi.fn(async (value): Promise<typeof Break> => {
+      const cb = vi.fn(async (value): Promise<typeof Break | void> => {
         if (value === 2) return Break;
         return;
       });
@@ -311,7 +311,7 @@ describe("asyncForEach", () => {
     });
 
     it("should break on encountering Break", async () => {
-      const cb = vi.fn(async (value): Promise<typeof Break> => {
+      const cb = vi.fn(async (value): Promise<typeof Break | void> => {
         if (value === 2) return Break;
         return;
       });

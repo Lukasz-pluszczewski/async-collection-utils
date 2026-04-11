@@ -1,15 +1,16 @@
 # Async Utility Functions
 
-A well tested and typed collection of map, forEach, reduce, filter etc. utility functions supporting arrays, sets, maps, plain objects, iterators in both async and synchronous versions.
+A well tested and typed collection of map, forEach, reduce, filter etc. utility functions supporting arrays, sets, maps, plain objects, iterators, and a synthetic infinite `true` source where applicable in both async and synchronous versions.
 
 
 ## Core Concepts
-Each method (except for "forEach" and all "toArray" utilities) returns the same type as the input: asyncMap(new Map(), () => {}) returns Promise<Map> etc.
+Each method (except for `forEach`, all `*ToArray` utilities, and all `*ToGenerator` utilities) returns the same type as the input: `asyncMap(new Map(), () => {})` returns `Promise<Map>` etc.
 
 
 
 - **Break**: A symbol that can be returned to stop the iteration.
 - **Last**: A utility that wraps a value. When returned, it stops the iteration and the provided value becomes the final output.
+- **`true` input**: Passing `true` creates an infinite numeric source (`0, 1, 2, ...`). The callback receives `(index, index, true)` and must eventually stop with `Break` or `Last(...)` except in `forEach`/`asyncForEach`, which only support `Break`.
 
 ## Usage
 ### Basic
@@ -34,36 +35,88 @@ const result = await asyncReduce(cursor, async (acc, item) => Promise.resolve(ac
 ```
 
 ### Utilities table
-Each type of utility has both async and sync versions. These return the same type as the input. The "toArray" utilities accept the same input but always return an array.
+Each type of utility has both async and sync versions. Base utilities return the same type as the input. The `*ToArray` utilities always return an array, and the `*ToGenerator` utilities always return a generator or async generator.
 
-|               | map | flatMap | filter | reduce | forEach |
-|:--------------|:---:|:-------:|:------:|:------:|:-------:|
-| async         |  ✅  |    ✅    |   ✅    |   ✅    |    ✅    |
-| sync          |  ✅  |    ✅    |   ✅    |   ✅    |    ✅    |
-| toArray async |  ✅  |    ✅    |   ✅    |  n/a   |   n/a   |
-| toArray sync  |  ✅  |    ✅    |   ✅    |  n/a   |   n/a   |
+|                   | map | flatMap | filter | reduce | forEach |
+|:------------------|:---:|:-------:|:------:|:------:|:-------:|
+| async             |  ✅  |    ✅    |   ✅    |   ✅    |    ✅    |
+| sync              |  ✅  |    ✅    |   ✅    |   ✅    |    ✅    |
+| toArray async     |  ✅  |    ✅    |   ✅    |  n/a   |   n/a   |
+| toArray sync      |  ✅  |    ✅    |   ✅    |  n/a   |   n/a   |
+| toGenerator async |  ✅  |    ✅    |   ✅    |  n/a   |   n/a   |
+| toGenerator sync  |  ✅  |    ✅    |   ✅    |  n/a   |   n/a   |
+
+### Infinite Source With `true`
+`true` is supported by `*ToArray`, `*ToGenerator`, `reduce`, `asyncReduce`, `forEach`, and `asyncForEach`. The base `map`, `flatMap`, and `filter` families do not accept `true`.
+
+```javascript
+import {
+  Break,
+  Last,
+  mapToArray,
+  mapToGenerator,
+  asyncFlatMapToGenerator,
+  reduce,
+} from 'async-collection-utils';
+
+const mapped = mapToGenerator(true, (value) => {
+  if (value === 3) return Break;
+  return value * 2;
+});
+// mapped: Generator<number> that yields 0, 2, 4
+
+const collected = mapToArray(true, (value) => {
+  if (value === 3) return Last(value * 2);
+  return value * 2;
+});
+// collected: [0, 2, 4, 6]
+
+const total = reduce(true, (acc, value) => {
+  if (value === 4) return Break;
+  return acc + value;
+}, 0);
+// total: 6
+
+const flattened = await asyncFlatMapToGenerator(true, async (value) => {
+  if (value === 2) return Last([20, 21]);
+  return [value, value + 10];
+});
+// flattened: AsyncGenerator<number> yielding 0, 10, 1, 11, 20, 21
+```
+
+When the input is `true`, return values follow the utility category rather than mirroring the input:
+- `*ToArray` utilities return arrays
+- `*ToGenerator` utilities return generators or async generators
+- `reduce` returns the accumulator
+- `forEach` returns `void`
 
 ### API Matrix
 
-| Utility               | Array | Set | Map | TypedArray | Plain Object | Iterable | AsyncIterable |
-|-----------------------|:-----:|:---:|:---:|:----------:|:------------:|:--------:|:-------------:|
-| `map`                 |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ❌            |
-| `asyncMap`            |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ✅            |
-| `mapToArray`          |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ❌            |
-| `asyncMapToArray`     |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ✅            |
-| `flatMap`             |  ✅   | ✅  | ❌  | ✅         | ❌           | ✅       | ❌            |
-| `asyncFlatMap`        |  ✅   | ✅  | ❌  | ✅         | ❌           | ✅       | ✅            |
-| `flatMapToArray`      |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ❌            |
-| `asyncFlatMapToArray` |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ✅            |
-| `filter`              |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ❌            |
-| `asyncFilter`         |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ✅            |
-| `filterToArray`       |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ❌            |
-| `asyncFilterToArray`  |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ✅            |
-| `reduce`              |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ❌            |
-| `asyncReduce`         |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ✅            |
-| `forEach`             |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ❌            |
-| `asyncForEach`        |  ✅   | ✅  | ✅  | ✅         | ✅           | ✅       | ✅            |
-| `batch`               |  ✅   | ✅  | ❌  | ❌         | ❌           | ✅       | ✅            |
+| Utility                   | Array | Set | Map | TypedArray | Plain Object | Iterable | AsyncIterable | `true` |
+|---------------------------|:-----:|:---:|:---:|:----------:|:------------:|:--------:|:-------------:|:------:|
+| `map`                     |   ✅   |  ✅  |  ✅  |     ✅      |      ✅       |    ✅     |       ❌       |   ❌    |
+| `asyncMap`                |   ✅   |  ✅  |  ✅  |     ✅      |      ✅       |    ✅     |       ✅       |   ❌    |
+| `mapToArray`              |   ✅   |  ✅  |  ✅  |     ✅      |      ✅       |    ✅     |       ❌       |   ✅    |
+| `asyncMapToArray`         |   ✅   |  ✅  |  ✅  |     ✅      |      ✅       |    ✅     |       ✅       |   ✅    |
+| `mapToGenerator`          |   ✅   |  ✅  |  ✅  |     ✅      |      ✅       |    ✅     |       ❌       |   ✅    |
+| `asyncMapToGenerator`     |   ✅   |  ✅  |  ✅  |     ✅      |      ✅       |    ✅     |       ✅       |   ✅    |
+| `flatMap`                 |   ✅   |  ✅  |  ❌  |     ✅      |      ❌       |    ✅     |       ❌       |   ❌    |
+| `asyncFlatMap`            |   ✅   |  ✅  |  ❌  |     ✅      |      ❌       |    ✅     |       ✅       |   ❌    |
+| `flatMapToArray`          |   ✅   |  ✅  |  ✅  |     ✅      |      ✅       |    ✅     |       ❌       |   ✅    |
+| `asyncFlatMapToArray`     |   ✅   |  ✅  |  ✅  |     ✅      |      ✅       |    ✅     |       ✅       |   ✅    |
+| `flatMapToGenerator`      |   ✅   |  ✅  |  ✅  |     ✅      |      ✅       |    ✅     |       ❌       |   ✅    |
+| `asyncFlatMapToGenerator` |   ✅   |  ✅  |  ✅  |     ✅      |      ✅       |    ✅     |       ✅       |   ✅    |
+| `filter`                  |   ✅   |  ✅  |  ✅  |     ✅      |      ✅       |    ✅     |       ❌       |   ❌    |
+| `asyncFilter`             |   ✅   |  ✅  |  ✅  |     ✅      |      ✅       |    ✅     |       ✅       |   ❌    |
+| `filterToArray`           |   ✅   |  ✅  |  ✅  |     ✅      |      ✅       |    ✅     |       ❌       |   ✅    |
+| `asyncFilterToArray`      |   ✅   |  ✅  |  ✅  |     ✅      |      ✅       |    ✅     |       ✅       |   ✅    |
+| `filterToGenerator`       |   ✅   |  ✅  |  ✅  |     ✅      |      ✅       |    ✅     |       ❌       |   ✅    |
+| `asyncFilterToGenerator`  |   ✅   |  ✅  |  ✅  |     ✅      |      ✅       |    ✅     |       ✅       |   ✅    |
+| `reduce`                  |   ✅   |  ✅  |  ✅  |     ✅      |      ✅       |    ✅     |       ❌       |   ✅    |
+| `asyncReduce`             |   ✅   |  ✅  |  ✅  |     ✅      |      ✅       |    ✅     |       ✅       |   ✅    |
+| `forEach`                 |   ✅   |  ✅  |  ✅  |     ✅      |      ✅       |    ✅     |       ❌       |   ✅    |
+| `asyncForEach`            |   ✅   |  ✅  |  ✅  |     ✅      |      ✅       |    ✅     |       ✅       |   ✅    |
+| `batch`                   |   ✅   |  ✅  |  ❌  |     ❌      |      ❌       |    ✅     |       ✅       |   ❌    |
 
 
 ### Usage with iterables

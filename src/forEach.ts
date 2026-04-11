@@ -1,5 +1,10 @@
 import { Break, isPlainObject, TypedArray } from "./shared";
 
+export function forEach(
+  iterable: true,
+  callback: (item: number, index: number, iterable: true) => void | typeof Break,
+): void;
+
 export function forEach<TCollection extends unknown[]>(
   array: TCollection,
   callback: (
@@ -60,6 +65,13 @@ export function forEach(
   iterable: unknown,
   callback: (...args: any[]) => void | typeof Break,
 ): void {
+  if (iterable === true) {
+    for (let i = 0; ; i++) {
+      if (callback(i, i, true) === Break) break;
+    }
+    return;
+  }
+
   if (Array.isArray(iterable)) {
     for (let i = 0; i < iterable.length; i++) {
       if (callback(iterable[i], i, iterable) === Break) break;

@@ -1,5 +1,16 @@
 import { Break, isPlainObject, LastClass, TypedArray } from "./shared";
 
+export async function asyncReduce<TAccumulator = number>(
+  iterable: true,
+  callback: (
+    acc: TAccumulator,
+    item: number,
+    index: number,
+    iterable: true,
+  ) => Promise<TAccumulator | typeof Break | LastClass<TAccumulator>>,
+  initialValue?: TAccumulator,
+): Promise<TAccumulator>;
+
 export async function asyncReduce<
   TCollection extends unknown[],
   TAccumulator = TCollection extends Array<infer TValue> ? TValue : never,
@@ -111,6 +122,20 @@ export async function asyncReduce(
   callback: (...args: any[]) => Promise<unknown>,
   initialValue?: unknown,
 ): Promise<unknown> {
+  if (iterable === true) {
+    let acc = initialValue;
+    for (let i = 0; ; i++) {
+      const result = await callback(acc, i, i, true);
+      if (result === Break) break;
+      if (result instanceof LastClass) {
+        acc = result.value;
+        break;
+      }
+      acc = result;
+    }
+    return acc;
+  }
+
   if (Array.isArray(iterable)) {
     let acc = initialValue;
     for (let i = 0; i < iterable.length; i++) {

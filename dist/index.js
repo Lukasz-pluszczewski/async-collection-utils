@@ -23,32 +23,39 @@ __export(index_exports, {
   Last: () => Last,
   asyncFilter: () => asyncFilter,
   asyncFilterToArray: () => asyncFilterToArray,
+  asyncFilterToGenerator: () => asyncFilterToGenerator,
   asyncFlatMap: () => asyncFlatMap,
   asyncFlatMapToArray: () => asyncFlatMapToArray,
+  asyncFlatMapToGenerator: () => asyncFlatMapToGenerator,
   asyncForEach: () => asyncForEach,
   asyncMap: () => asyncMap,
   asyncMapToArray: () => asyncMapToArray,
+  asyncMapToGenerator: () => asyncMapToGenerator,
   asyncReduce: () => asyncReduce,
   batch: () => batch,
   entries: () => entries,
   filter: () => filter,
   filterToArray: () => filterToArray,
+  filterToGenerator: () => filterToGenerator,
   flatMap: () => flatMap,
   flatMapToArray: () => flatMapToArray,
+  flatMapToGenerator: () => flatMapToGenerator,
   forEach: () => forEach,
   keys: () => keys,
   map: () => map,
   mapToArray: () => mapToArray,
+  mapToGenerator: () => mapToGenerator,
   reduce: () => reduce
 });
 module.exports = __toCommonJS(index_exports);
 
 // src/shared.ts
-var Break = Symbol("BreakSymbol");
+var Break = /* @__PURE__ */ Symbol("BreakSymbol");
 var LastClass = class {
   constructor(value) {
     this.value = value;
   }
+  value;
 };
 var Last = (value) => new LastClass(value);
 var entries = (object) => {
@@ -249,6 +256,19 @@ function map(iterable, callback) {
 
 // src/asyncMapToArray.ts
 async function asyncMapToArray(iterable, callback) {
+  if (iterable === true) {
+    const result2 = [];
+    for (let i2 = 0; ; i2++) {
+      const mapped = await callback(i2, i2, true);
+      if (mapped === Break) break;
+      if (mapped instanceof LastClass) {
+        result2.push(mapped.value);
+        break;
+      }
+      result2.push(mapped);
+    }
+    return result2;
+  }
   if (Array.isArray(iterable)) {
     const result2 = [];
     for (let i2 = 0; i2 < iterable.length; i2++) {
@@ -332,6 +352,19 @@ async function asyncMapToArray(iterable, callback) {
 
 // src/mapToArray.ts
 function mapToArray(iterable, callback) {
+  if (iterable === true) {
+    const result2 = [];
+    for (let i2 = 0; ; i2++) {
+      const mapped = callback(i2, i2, true);
+      if (mapped === Break) break;
+      if (mapped instanceof LastClass) {
+        result2.push(mapped.value);
+        break;
+      }
+      result2.push(mapped);
+    }
+    return result2;
+  }
   if (Array.isArray(iterable)) {
     const result2 = [];
     for (let i2 = 0; i2 < iterable.length; i2++) {
@@ -411,6 +444,198 @@ function mapToArray(iterable, callback) {
     result.push(mapped);
   }
   return result;
+}
+
+// src/asyncMapToGenerator.ts
+async function asyncMapToGenerator(iterable, callback) {
+  if (iterable === true) {
+    return (async function* () {
+      for (let i = 0; ; i++) {
+        const mapped = await callback(i, i, true);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          yield mapped.value;
+          break;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  if (Array.isArray(iterable)) {
+    return (async function* () {
+      for (let i = 0; i < iterable.length; i++) {
+        const mapped = await callback(iterable[i], i, iterable);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          yield mapped.value;
+          break;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  if (iterable instanceof Set) {
+    return (async function* () {
+      let i = 0;
+      for (const item of iterable) {
+        const mapped = await callback(item, i++, iterable);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          yield mapped.value;
+          break;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  if (iterable instanceof Map) {
+    return (async function* () {
+      for (const [key, value] of iterable) {
+        const mapped = await callback(value, key, iterable);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          yield mapped.value;
+          break;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  if (ArrayBuffer.isView(iterable)) {
+    return (async function* () {
+      let i = 0;
+      for (const value of iterable) {
+        const mapped = await callback(value, i++, iterable);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          yield mapped.value;
+          break;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  if (isPlainObject(iterable)) {
+    return (async function* () {
+      for (const key of Object.keys(iterable)) {
+        const mapped = await callback(iterable[key], key, iterable);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          yield mapped.value;
+          break;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  return (async function* () {
+    let i = 0;
+    for await (const item of iterable) {
+      const mapped = await callback(item, i++, iterable);
+      if (mapped === Break) break;
+      if (mapped instanceof LastClass) {
+        yield mapped.value;
+        break;
+      }
+      yield mapped;
+    }
+  })();
+}
+
+// src/mapToGenerator.ts
+function mapToGenerator(iterable, callback) {
+  if (iterable === true) {
+    return (function* () {
+      for (let i = 0; ; i++) {
+        const mapped = callback(i, i, true);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          yield mapped.value;
+          break;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  if (Array.isArray(iterable)) {
+    return (function* () {
+      for (let i = 0; i < iterable.length; i++) {
+        const mapped = callback(iterable[i], i, iterable);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          yield mapped.value;
+          break;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  if (iterable instanceof Set) {
+    return (function* () {
+      let i = 0;
+      for (const item of iterable) {
+        const mapped = callback(item, i++, iterable);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          yield mapped.value;
+          break;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  if (iterable instanceof Map) {
+    return (function* () {
+      for (const [key, value] of iterable) {
+        const mapped = callback(value, key, iterable);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          yield mapped.value;
+          break;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  if (ArrayBuffer.isView(iterable)) {
+    return (function* () {
+      let i = 0;
+      for (const value of iterable) {
+        const mapped = callback(value, i++, iterable);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          yield mapped.value;
+          break;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  if (isPlainObject(iterable)) {
+    return (function* () {
+      for (const key of Object.keys(iterable)) {
+        const mapped = callback(iterable[key], key, iterable);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          yield mapped.value;
+          break;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  return (function* () {
+    let i = 0;
+    for (const item of iterable) {
+      const mapped = callback(item, i++, iterable);
+      if (mapped === Break) break;
+      if (mapped instanceof LastClass) {
+        yield mapped.value;
+        break;
+      }
+      yield mapped;
+    }
+  })();
 }
 
 // src/asyncFlatMap.ts
@@ -613,6 +838,27 @@ function flatMap(iterable, callback) {
 
 // src/asyncFlatMapToArray.ts
 async function asyncFlatMapToArray(iterable, callback) {
+  if (iterable === true) {
+    const result2 = [];
+    for (let i2 = 0; ; i2++) {
+      const mapped = await callback(i2, i2, true);
+      if (mapped === Break) break;
+      if (mapped instanceof LastClass) {
+        if (Array.isArray(mapped.value)) {
+          result2.push(...mapped.value);
+          break;
+        }
+        result2.push(mapped.value);
+        break;
+      }
+      if (Array.isArray(mapped)) {
+        result2.push(...mapped);
+        continue;
+      }
+      result2.push(mapped);
+    }
+    return result2;
+  }
   if (Array.isArray(iterable)) {
     const result2 = [];
     for (let i2 = 0; i2 < iterable.length; i2++) {
@@ -760,6 +1006,27 @@ async function asyncFlatMapToArray(iterable, callback) {
 
 // src/flatMapToArray.ts
 function flatMapToArray(iterable, callback) {
+  if (iterable === true) {
+    const result2 = [];
+    for (let i2 = 0; ; i2++) {
+      const mapped = callback(i2, i2, true);
+      if (mapped === Break) break;
+      if (mapped instanceof LastClass) {
+        if (Array.isArray(mapped.value)) {
+          result2.push(...mapped.value);
+          break;
+        }
+        result2.push(mapped.value);
+        break;
+      }
+      if (Array.isArray(mapped)) {
+        result2.push(...mapped);
+        continue;
+      }
+      result2.push(mapped);
+    }
+    return result2;
+  }
   if (Array.isArray(iterable)) {
     const result2 = [];
     for (let i2 = 0; i2 < iterable.length; i2++) {
@@ -903,6 +1170,366 @@ function flatMapToArray(iterable, callback) {
     result.push(mapped);
   }
   return result;
+}
+
+// src/asyncFlatMapToGenerator.ts
+async function asyncFlatMapToGenerator(iterable, callback) {
+  if (iterable === true) {
+    return (async function* () {
+      for (let i = 0; ; i++) {
+        const mapped = await callback(i, i, true);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          if (Array.isArray(mapped.value)) {
+            for (let index = 0; index < mapped.value.length; index++) {
+              yield mapped.value[index];
+            }
+            break;
+          }
+          yield mapped.value;
+          break;
+        }
+        if (Array.isArray(mapped)) {
+          for (let index = 0; index < mapped.length; index++) {
+            yield mapped[index];
+          }
+          continue;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  if (Array.isArray(iterable)) {
+    return (async function* () {
+      for (let i = 0; i < iterable.length; i++) {
+        const mapped = await callback(iterable[i], i, iterable);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          if (Array.isArray(mapped.value)) {
+            for (let index = 0; index < mapped.value.length; index++) {
+              yield mapped.value[index];
+            }
+            break;
+          }
+          yield mapped.value;
+          break;
+        }
+        if (Array.isArray(mapped)) {
+          for (let index = 0; index < mapped.length; index++) {
+            yield mapped[index];
+          }
+          continue;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  if (iterable instanceof Set) {
+    return (async function* () {
+      let i = 0;
+      for (const item of iterable) {
+        const mapped = await callback(item, i++, iterable);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          if (Array.isArray(mapped.value)) {
+            for (let index = 0; index < mapped.value.length; index++) {
+              yield mapped.value[index];
+            }
+            break;
+          }
+          yield mapped.value;
+          break;
+        }
+        if (Array.isArray(mapped)) {
+          for (let index = 0; index < mapped.length; index++) {
+            yield mapped[index];
+          }
+          continue;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  if (iterable instanceof Map) {
+    return (async function* () {
+      for (const [key, value] of iterable) {
+        const mapped = await callback(value, key, iterable);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          if (Array.isArray(mapped.value)) {
+            for (let index = 0; index < mapped.value.length; index++) {
+              yield mapped.value[index];
+            }
+            break;
+          }
+          yield mapped.value;
+          break;
+        }
+        if (Array.isArray(mapped)) {
+          for (let index = 0; index < mapped.length; index++) {
+            yield mapped[index];
+          }
+          continue;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  if (ArrayBuffer.isView(iterable)) {
+    return (async function* () {
+      let i = 0;
+      for (const value of iterable) {
+        const mapped = await callback(value, i++, iterable);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          if (Array.isArray(mapped.value)) {
+            for (let index = 0; index < mapped.value.length; index++) {
+              yield mapped.value[index];
+            }
+            break;
+          }
+          yield mapped.value;
+          break;
+        }
+        if (Array.isArray(mapped)) {
+          for (let index = 0; index < mapped.length; index++) {
+            yield mapped[index];
+          }
+          continue;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  if (isPlainObject(iterable)) {
+    return (async function* () {
+      for (const key of Object.keys(iterable)) {
+        const mapped = await callback(iterable[key], key, iterable);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          if (Array.isArray(mapped.value)) {
+            for (let index = 0; index < mapped.value.length; index++) {
+              yield mapped.value[index];
+            }
+            break;
+          }
+          yield mapped.value;
+          break;
+        }
+        if (Array.isArray(mapped)) {
+          for (let index = 0; index < mapped.length; index++) {
+            yield mapped[index];
+          }
+          continue;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  return (async function* () {
+    let i = 0;
+    for await (const item of iterable) {
+      const mapped = await callback(item, i++, iterable);
+      if (mapped === Break) break;
+      if (mapped instanceof LastClass) {
+        if (Array.isArray(mapped.value)) {
+          for (let index = 0; index < mapped.value.length; index++) {
+            yield mapped.value[index];
+          }
+          break;
+        }
+        yield mapped.value;
+        break;
+      }
+      if (Array.isArray(mapped)) {
+        for (let index = 0; index < mapped.length; index++) {
+          yield mapped[index];
+        }
+        continue;
+      }
+      yield mapped;
+    }
+  })();
+}
+
+// src/flatMapToGenerator.ts
+function flatMapToGenerator(iterable, callback) {
+  if (iterable === true) {
+    return (function* () {
+      for (let i = 0; ; i++) {
+        const mapped = callback(i, i, true);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          if (Array.isArray(mapped.value)) {
+            for (let index = 0; index < mapped.value.length; index++) {
+              yield mapped.value[index];
+            }
+            break;
+          }
+          yield mapped.value;
+          break;
+        }
+        if (Array.isArray(mapped)) {
+          for (let index = 0; index < mapped.length; index++) {
+            yield mapped[index];
+          }
+          continue;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  if (Array.isArray(iterable)) {
+    return (function* () {
+      for (let i = 0; i < iterable.length; i++) {
+        const mapped = callback(iterable[i], i, iterable);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          if (Array.isArray(mapped.value)) {
+            for (let index = 0; index < mapped.value.length; index++) {
+              yield mapped.value[index];
+            }
+            break;
+          }
+          yield mapped.value;
+          break;
+        }
+        if (Array.isArray(mapped)) {
+          for (let index = 0; index < mapped.length; index++) {
+            yield mapped[index];
+          }
+          continue;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  if (iterable instanceof Set) {
+    return (function* () {
+      let i = 0;
+      for (const item of iterable) {
+        const mapped = callback(item, i++, iterable);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          if (Array.isArray(mapped.value)) {
+            for (let index = 0; index < mapped.value.length; index++) {
+              yield mapped.value[index];
+            }
+            break;
+          }
+          yield mapped.value;
+          break;
+        }
+        if (Array.isArray(mapped)) {
+          for (let index = 0; index < mapped.length; index++) {
+            yield mapped[index];
+          }
+          continue;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  if (iterable instanceof Map) {
+    return (function* () {
+      for (const [key, value] of iterable) {
+        const mapped = callback(value, key, iterable);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          if (Array.isArray(mapped.value)) {
+            for (let index = 0; index < mapped.value.length; index++) {
+              yield mapped.value[index];
+            }
+            break;
+          }
+          yield mapped.value;
+          break;
+        }
+        if (Array.isArray(mapped)) {
+          for (let index = 0; index < mapped.length; index++) {
+            yield mapped[index];
+          }
+          continue;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  if (ArrayBuffer.isView(iterable)) {
+    return (function* () {
+      let i = 0;
+      for (const value of iterable) {
+        const mapped = callback(value, i++, iterable);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          if (Array.isArray(mapped.value)) {
+            for (let index = 0; index < mapped.value.length; index++) {
+              yield mapped.value[index];
+            }
+            break;
+          }
+          yield mapped.value;
+          break;
+        }
+        if (Array.isArray(mapped)) {
+          for (let index = 0; index < mapped.length; index++) {
+            yield mapped[index];
+          }
+          continue;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  if (isPlainObject(iterable)) {
+    return (function* () {
+      for (const key of Object.keys(iterable)) {
+        const mapped = callback(iterable[key], key, iterable);
+        if (mapped === Break) break;
+        if (mapped instanceof LastClass) {
+          if (Array.isArray(mapped.value)) {
+            for (let index = 0; index < mapped.value.length; index++) {
+              yield mapped.value[index];
+            }
+            break;
+          }
+          yield mapped.value;
+          break;
+        }
+        if (Array.isArray(mapped)) {
+          for (let index = 0; index < mapped.length; index++) {
+            yield mapped[index];
+          }
+          continue;
+        }
+        yield mapped;
+      }
+    })();
+  }
+  return (function* () {
+    let i = 0;
+    for (const item of iterable) {
+      const mapped = callback(item, i++, iterable);
+      if (mapped === Break) break;
+      if (mapped instanceof LastClass) {
+        if (Array.isArray(mapped.value)) {
+          for (let index = 0; index < mapped.value.length; index++) {
+            yield mapped.value[index];
+          }
+          break;
+        }
+        yield mapped.value;
+        break;
+      }
+      if (Array.isArray(mapped)) {
+        for (let index = 0; index < mapped.length; index++) {
+          yield mapped[index];
+        }
+        continue;
+      }
+      yield mapped;
+    }
+  })();
 }
 
 // src/asyncFilter.ts
@@ -1101,6 +1728,23 @@ function filter(iterable, predicate) {
 
 // src/asyncFilterToArray.ts
 async function asyncFilterToArray(iterable, predicate) {
+  if (iterable === true) {
+    const result2 = [];
+    for (let i2 = 0; ; i2++) {
+      const decision = await predicate(i2, i2, true);
+      if (decision === Break) break;
+      if (decision instanceof LastClass) {
+        if (decision.value) {
+          result2.push(i2);
+        }
+        break;
+      }
+      if (decision) {
+        result2.push(i2);
+      }
+    }
+    return result2;
+  }
   if (Array.isArray(iterable)) {
     const result2 = [];
     for (let i2 = 0; i2 < iterable.length; i2++) {
@@ -1196,6 +1840,23 @@ async function asyncFilterToArray(iterable, predicate) {
 
 // src/filterToArray.ts
 function filterToArray(iterable, predicate) {
+  if (iterable === true) {
+    const result2 = [];
+    for (let i2 = 0; ; i2++) {
+      const decision = predicate(i2, i2, true);
+      if (decision === Break) break;
+      if (decision instanceof LastClass) {
+        if (decision.value) {
+          result2.push(i2);
+        }
+        break;
+      }
+      if (decision) {
+        result2.push(i2);
+      }
+    }
+    return result2;
+  }
   if (Array.isArray(iterable)) {
     const result2 = [];
     for (let i2 = 0; i2 < iterable.length; i2++) {
@@ -1289,8 +1950,269 @@ function filterToArray(iterable, predicate) {
   return result;
 }
 
+// src/asyncFilterToGenerator.ts
+async function asyncFilterToGenerator(iterable, predicate) {
+  if (iterable === true) {
+    return (async function* () {
+      for (let i = 0; ; i++) {
+        const decision = await predicate(i, i, true);
+        if (decision === Break) break;
+        if (decision instanceof LastClass) {
+          if (decision.value) {
+            yield i;
+          }
+          break;
+        }
+        if (decision) {
+          yield i;
+        }
+      }
+    })();
+  }
+  if (Array.isArray(iterable)) {
+    return (async function* () {
+      for (let i = 0; i < iterable.length; i++) {
+        const decision = await predicate(iterable[i], i, iterable);
+        if (decision === Break) break;
+        if (decision instanceof LastClass) {
+          if (decision.value) {
+            yield iterable[i];
+          }
+          break;
+        }
+        if (decision) {
+          yield iterable[i];
+        }
+      }
+    })();
+  }
+  if (iterable instanceof Set) {
+    return (async function* () {
+      let i = 0;
+      for (const item of iterable) {
+        const decision = await predicate(item, i++, iterable);
+        if (decision === Break) break;
+        if (decision instanceof LastClass) {
+          if (decision.value) {
+            yield item;
+          }
+          break;
+        }
+        if (decision) {
+          yield item;
+        }
+      }
+    })();
+  }
+  if (iterable instanceof Map) {
+    return (async function* () {
+      for (const [key, value] of iterable) {
+        const decision = await predicate(value, key, iterable);
+        if (decision === Break) break;
+        if (decision instanceof LastClass) {
+          if (decision.value) {
+            yield value;
+          }
+          break;
+        }
+        if (decision) {
+          yield value;
+        }
+      }
+    })();
+  }
+  if (ArrayBuffer.isView(iterable)) {
+    return (async function* () {
+      let i = 0;
+      for (const value of iterable) {
+        const decision = await predicate(value, i++, iterable);
+        if (decision === Break) break;
+        if (decision instanceof LastClass) {
+          if (decision.value) {
+            yield value;
+          }
+          break;
+        }
+        if (decision) {
+          yield value;
+        }
+      }
+    })();
+  }
+  if (isPlainObject(iterable)) {
+    return (async function* () {
+      for (const key of Object.keys(iterable)) {
+        const decision = await predicate(iterable[key], key, iterable);
+        if (decision === Break) break;
+        if (decision instanceof LastClass) {
+          if (decision.value) {
+            yield iterable[key];
+          }
+          break;
+        }
+        if (decision) {
+          yield iterable[key];
+        }
+      }
+    })();
+  }
+  return (async function* () {
+    let i = 0;
+    for await (const item of iterable) {
+      const decision = await predicate(item, i++, iterable);
+      if (decision === Break) break;
+      if (decision instanceof LastClass) {
+        if (decision.value) {
+          yield item;
+        }
+        break;
+      }
+      if (decision) {
+        yield item;
+      }
+    }
+  })();
+}
+
+// src/filterToGenerator.ts
+function filterToGenerator(iterable, predicate) {
+  if (iterable === true) {
+    return (function* () {
+      for (let i = 0; ; i++) {
+        const decision = predicate(i, i, true);
+        if (decision === Break) break;
+        if (decision instanceof LastClass) {
+          if (decision.value) {
+            yield i;
+          }
+          break;
+        }
+        if (decision) {
+          yield i;
+        }
+      }
+    })();
+  }
+  if (Array.isArray(iterable)) {
+    return (function* () {
+      for (let i = 0; i < iterable.length; i++) {
+        const decision = predicate(iterable[i], i, iterable);
+        if (decision === Break) break;
+        if (decision instanceof LastClass) {
+          if (decision.value) {
+            yield iterable[i];
+          }
+          break;
+        }
+        if (decision) {
+          yield iterable[i];
+        }
+      }
+    })();
+  }
+  if (iterable instanceof Set) {
+    return (function* () {
+      let i = 0;
+      for (const item of iterable) {
+        const decision = predicate(item, i++, iterable);
+        if (decision === Break) break;
+        if (decision instanceof LastClass) {
+          if (decision.value) {
+            yield item;
+          }
+          break;
+        }
+        if (decision) {
+          yield item;
+        }
+      }
+    })();
+  }
+  if (iterable instanceof Map) {
+    return (function* () {
+      for (const [key, value] of iterable) {
+        const decision = predicate(value, key, iterable);
+        if (decision === Break) break;
+        if (decision instanceof LastClass) {
+          if (decision.value) {
+            yield value;
+          }
+          break;
+        }
+        if (decision) {
+          yield value;
+        }
+      }
+    })();
+  }
+  if (ArrayBuffer.isView(iterable)) {
+    return (function* () {
+      let i = 0;
+      for (const value of iterable) {
+        const decision = predicate(value, i++, iterable);
+        if (decision === Break) break;
+        if (decision instanceof LastClass) {
+          if (decision.value) {
+            yield value;
+          }
+          break;
+        }
+        if (decision) {
+          yield value;
+        }
+      }
+    })();
+  }
+  if (isPlainObject(iterable)) {
+    return (function* () {
+      for (const key of Object.keys(iterable)) {
+        const decision = predicate(iterable[key], key, iterable);
+        if (decision === Break) break;
+        if (decision instanceof LastClass) {
+          if (decision.value) {
+            yield iterable[key];
+          }
+          break;
+        }
+        if (decision) {
+          yield iterable[key];
+        }
+      }
+    })();
+  }
+  return (function* () {
+    let i = 0;
+    for (const item of iterable) {
+      const decision = predicate(item, i++, iterable);
+      if (decision === Break) break;
+      if (decision instanceof LastClass) {
+        if (decision.value) {
+          yield item;
+        }
+        break;
+      }
+      if (decision) {
+        yield item;
+      }
+    }
+  })();
+}
+
 // src/asyncReduce.ts
 async function asyncReduce(iterable, callback, initialValue) {
+  if (iterable === true) {
+    let acc2 = initialValue;
+    for (let i2 = 0; ; i2++) {
+      const result = await callback(acc2, i2, i2, true);
+      if (result === Break) break;
+      if (result instanceof LastClass) {
+        acc2 = result.value;
+        break;
+      }
+      acc2 = result;
+    }
+    return acc2;
+  }
   if (Array.isArray(iterable)) {
     let acc2 = initialValue;
     for (let i2 = 0; i2 < iterable.length; i2++) {
@@ -1374,6 +2296,19 @@ async function asyncReduce(iterable, callback, initialValue) {
 
 // src/reduce.ts
 function reduce(iterable, callback, initialValue) {
+  if (iterable === true) {
+    let acc2 = initialValue;
+    for (let i2 = 0; ; i2++) {
+      const result = callback(acc2, i2, i2, true);
+      if (result === Break) break;
+      if (result instanceof LastClass) {
+        acc2 = result.value;
+        break;
+      }
+      acc2 = result;
+    }
+    return acc2;
+  }
   if (Array.isArray(iterable)) {
     let acc2 = initialValue;
     for (let i2 = 0; i2 < iterable.length; i2++) {
@@ -1457,6 +2392,12 @@ function reduce(iterable, callback, initialValue) {
 
 // src/asyncForEach.ts
 async function asyncForEach(iterable, callback) {
+  if (iterable === true) {
+    for (let i2 = 0; ; i2++) {
+      if (await callback(i2, i2, true) === Break) break;
+    }
+    return;
+  }
   if (Array.isArray(iterable)) {
     for (let i2 = 0; i2 < iterable.length; i2++) {
       if (await callback(iterable[i2], i2, iterable) === Break) break;
@@ -1498,6 +2439,12 @@ async function asyncForEach(iterable, callback) {
 
 // src/forEach.ts
 function forEach(iterable, callback) {
+  if (iterable === true) {
+    for (let i2 = 0; ; i2++) {
+      if (callback(i2, i2, true) === Break) break;
+    }
+    return;
+  }
   if (Array.isArray(iterable)) {
     for (let i2 = 0; i2 < iterable.length; i2++) {
       if (callback(iterable[i2], i2, iterable) === Break) break;
@@ -1609,21 +2556,27 @@ function batch(iterable, batchSize) {
   Last,
   asyncFilter,
   asyncFilterToArray,
+  asyncFilterToGenerator,
   asyncFlatMap,
   asyncFlatMapToArray,
+  asyncFlatMapToGenerator,
   asyncForEach,
   asyncMap,
   asyncMapToArray,
+  asyncMapToGenerator,
   asyncReduce,
   batch,
   entries,
   filter,
   filterToArray,
+  filterToGenerator,
   flatMap,
   flatMapToArray,
+  flatMapToGenerator,
   forEach,
   keys,
   map,
   mapToArray,
+  mapToGenerator,
   reduce
 });
