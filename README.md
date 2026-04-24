@@ -2,15 +2,12 @@
 
 A well tested and typed collection of map, forEach, reduce, filter etc. utility functions supporting arrays, sets, maps, plain objects, iterators, and a synthetic infinite `true` source where applicable in both async and synchronous versions.
 
-
 ## Core Concepts
 Each method (except for `forEach`, all `*ToArray` utilities, and all `*ToGenerator` utilities) returns the same type as the input: `asyncMap(new Map(), () => {})` returns `Promise<Map>` etc.
 
-
-
 - **Break**: A symbol that can be returned to stop the iteration.
 - **Last**: A utility that wraps a value. When returned, it stops the iteration and the provided value becomes the final output.
-- **`true` input**: Passing `true` creates an infinite numeric source (`0, 1, 2, ...`). The callback receives `(index, index, true)` and must eventually stop with `Break` or `Last(...)` except in `forEach`/`asyncForEach`, which only support `Break`.
+- **`true` input**: Passing `true` creates an infinite numeric source (`0, 1, 2, ...`). The callback receives `(index, index, true)` and must eventually stop with `Break` or `Last(...)`.
 
 ## Usage
 ### Basic
