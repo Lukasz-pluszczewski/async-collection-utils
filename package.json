@@ -1,16 +1,24 @@
 {
   "name": "async-collection-utils",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsup-node src/index.ts --dts",
-    "test": "vitest --globals --typecheck",
+    "test": "npm run test:runtime && npm run test:types",
+    "test:runtime": "vitest --globals --coverage src/*.test.ts",
+    "test:types": "vitest --globals --typecheck src/*.test-d.ts",
+    "pack:check": "npm pack --dry-run --cache /tmp/npm-cache",
     "generateToc": "markdown-toc --bullets=\"*\" --no-firsth1 README.md"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Lukasz-pluszczewski/async-collection-utils"
+    "url": "git+https://github.com/Lukasz-pluszczewski/async-collection-utils.git"
   },
   "author": "Łukasz Pluszczewski",
   "bugs": {
@@ -26,15 +34,20 @@
     "entries",
     "keys",
     "object",
-    "array"
+    "array",
+    "iterables",
+    "generator",
+    "stream"
   ],
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^22.15.23",
+    "@types/node": "^24.1.0",
+    "@vitest/coverage-v8": "^4.1.4",
+    "benchmarkify": "^4.0.0",
     "markdown-toc": "^1.2.0",
     "prettier": "^3.5.3",
-    "tsup": "^8.5.0",
-    "typescript": "^5.8.3",
-    "vitest": "^3.1.4"
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.4"
   }
 }
